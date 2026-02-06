@@ -14,6 +14,8 @@ public class PlayerAnimations : MonoBehaviour
     private float smoothMoveX;
     private float smoothMoveY;
 
+    private bool isMoving;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -48,14 +50,13 @@ public class PlayerAnimations : MonoBehaviour
 
     private void MovementAnim()
     {
+        animator.speed = playerMovement.isWalking ? 0.75f : 1f;
+
         animator.SetBool("IsGrounded", controller.isGrounded);
 
         Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
 
-        if(inputVector.magnitude > 0.1f)
-            animator.SetBool("IsMoving", true);
-        else
-            animator.SetBool("IsMoving", false);
+        animator.SetBool("IsMoving", inputVector.magnitude > 0.1f);
 
         smoothMoveX = Mathf.Lerp(smoothMoveX, inputVector.x, animSmoothSpeed * Time.deltaTime);
         smoothMoveY = Mathf.Lerp(smoothMoveY, inputVector.y, animSmoothSpeed * Time.deltaTime);
