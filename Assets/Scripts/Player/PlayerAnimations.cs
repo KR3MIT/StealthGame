@@ -50,7 +50,7 @@ public class PlayerAnimations : MonoBehaviour
 
     private void MovementAnim()
     {
-        animator.speed = playerMovement.isWalking ? 0.75f : 1f;
+        var speedModifier = playerMovement.isWalking ? 0f : 1f;
 
         animator.SetBool("IsGrounded", controller.isGrounded);
 
@@ -58,8 +58,11 @@ public class PlayerAnimations : MonoBehaviour
 
         animator.SetBool("IsMoving", inputVector.magnitude > 0.1f);
 
-        smoothMoveX = Mathf.Lerp(smoothMoveX, inputVector.x, animSmoothSpeed * Time.deltaTime);
-        smoothMoveY = Mathf.Lerp(smoothMoveY, inputVector.y, animSmoothSpeed * Time.deltaTime);
+        float targetX = inputVector.x + inputVector.x * speedModifier;
+        float targetY = inputVector.y + inputVector.y * speedModifier;
+
+        smoothMoveX = Mathf.Lerp(smoothMoveX, targetX, animSmoothSpeed * Time.deltaTime);
+        smoothMoveY = Mathf.Lerp(smoothMoveY, targetY, animSmoothSpeed * Time.deltaTime);
 
         animator.SetFloat("MoveX", smoothMoveX);
         animator.SetFloat("MoveY", smoothMoveY);
