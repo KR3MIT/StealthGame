@@ -10,7 +10,10 @@ public class PlayerMovement : MonoBehaviour
 
     private CharacterController controller;
     private PlayerInput input;
+    private PlayerClimbing climb;
+
     private float verticalVelocity;
+
     public bool isWalking {  get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -31,6 +34,7 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
+        climb = GetComponent<PlayerClimbing>();
     }
 
     private void Inputs()
@@ -59,7 +63,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump()
     {
-        if(controller.isGrounded)
+        if(controller.isGrounded && !climb.isClimbing)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }

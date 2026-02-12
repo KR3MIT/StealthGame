@@ -1,4 +1,3 @@
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,8 +12,6 @@ public class PlayerAnimations : MonoBehaviour
 
     private float smoothMoveX;
     private float smoothMoveY;
-
-    private bool isMoving;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -50,9 +47,10 @@ public class PlayerAnimations : MonoBehaviour
 
     private void MovementAnim()
     {
-        var speedModifier = playerMovement.isWalking ? 0f : 1f;
-
         animator.SetBool("IsGrounded", controller.isGrounded);
+        animator.SetBool("isWalking", playerMovement.isWalking);
+
+        var speedModifier = playerMovement.isWalking ? 0f : 1f;
 
         Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
 
