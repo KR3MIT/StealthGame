@@ -8,7 +8,8 @@ public class PlayerAnimations : MonoBehaviour
     private Animator animator;
     private PlayerInput input;
     private CharacterController controller;
-    private PlayerMovement playerMovement;
+    private PlayerMovement movement;
+    private PlayerClimbing climbing;
 
     private float smoothMoveX;
     private float smoothMoveY;
@@ -23,7 +24,8 @@ public class PlayerAnimations : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MovementAnim();
+        Movement();
+        SetStates();
     }
 
     private void Initialize()
@@ -31,7 +33,8 @@ public class PlayerAnimations : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         input = GetComponent<PlayerInput>();
         controller = GetComponent<CharacterController>();
-        playerMovement = GetComponent<PlayerMovement>();
+        movement = GetComponent<PlayerMovement>();
+        climbing = GetComponent<PlayerClimbing>();
     }
 
     private void Inputs()
@@ -39,18 +42,25 @@ public class PlayerAnimations : MonoBehaviour
         input.actions["Jump/Climb"].performed += ctx => Jump();
     }
 
+    private void SetStates()
+    {
+        animator.SetBool("IsGrounded", controller.isGrounded);
+        animator.SetBool("isWalking", movement.isWalking);
+        animator.SetBool("isClimbing", climbing.isClimbing);
+    }
+
     private void Jump()
     {
-        if(controller.isGrounded)
+        if(controller.isGrounded && !climbing.isClimbing)
             animator.SetTrigger("Jump");
     }
 
-    private void MovementAnim()
+    private void Movement()
     {
-        animator.SetBool("IsGrounded", controller.isGrounded);
-        animator.SetBool("isWalking", playerMovement.isWalking);
-
-        var speedModifier = playerMovement.isWalking ? 0f : 1f;
+        if (climbing.isClimbing)
+            return;
+        
+        var speedModifier = movement.isWalking ? 0f : 1f;
 
         Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
 

@@ -1,16 +1,16 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerClimbing : MonoBehaviour
 {
-    public LayerMask environmentMask;
+    public LayerMask mask;
 
     private PlayerInput input;
-    private PlayerMovement playerMovement;
+    private PlayerMovement movement;
     private CharacterController controller;
 
+    public float climbDistance { get; private set; }
     public bool isClimbing { get; private set; } = false;
 
     void Start()
@@ -28,7 +28,7 @@ public class PlayerClimbing : MonoBehaviour
     private void Initialize()
     {
         input = GetComponent<PlayerInput>();
-        playerMovement = GetComponent<PlayerMovement>();
+        movement = GetComponent<PlayerMovement>();
         controller = GetComponent<CharacterController>();
     }
 
@@ -44,54 +44,123 @@ public class PlayerClimbing : MonoBehaviour
             return;
 
         Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
-        if (inputVector.y > -0.1f)
+
+        var currentPos = transform.position;
+
+        if (inputVector.y < 0f)
         {
             StopAllCoroutines();
-            playerMovement.enabled = true;
+            isClimbing = false;
+
+            StartCoroutine(SetStopPosition(currentPos));
         }
-        Debug.Log("Cancel Climb");
+    }
+
+    private IEnumerator SetStopPosition(Vector3 pos)
+    {
+        controller.enabled = false;
+        yield return new WaitForEndOfFrame();
+        transform.position = pos + new Vector3 (0, (controller.height / 2), 0);
+        controller.enabled = true;
     }
 
     private void ClimbCheck()
     {
-        var offset = transform.rotation * new Vector3(0f, 3f, 0.75f);
+        var checkPos = transform.localPosition + new Vector3(0f, controller.height/2, 0f);
+        Physics.Raycast(checkPos, transform.up, out RaycastHit upInfo, 1f, mask);
+
+        Debug.DrawRay(checkPos, transform.up * upInfo.distance, Color.blue, 4);
+
+        if (upInfo.collider != null)
+            return;
+
+        var offset = transform.rotation * new Vector3(0f, 3f, 0.5f);
         
-        var heightRay = Physics.Raycast(transform.localPosition + offset, -transform.up, out RaycastHit hitInfo, 5f, environmentMask);
+        var heightRay = Physics.Raycast(transform.localPosition + offset, -transform.up, out RaycastHit hitInfo, 5f, mask);
 
         Debug.DrawRay(transform.localPosition + offset, -transform.up * hitInfo.distance, Color.red, 4f);
 
-        Debug.Log(hitInfo.distance);
+        climbDistance = hitInfo.distance;
 
-        if (!isClimbing) { 
+        if (!isClimbing) 
+        { 
             switch (hitInfo.distance)
             {
                 case > 3.5f:
-                    Debug.Log("just move");
                     break;
                 case > 3f:
-                    Debug.Log("vault");
+                    //StartCoroutine(Vault(hitInfo.point));
                     break;
                 case > 1f:
-                    Debug.Log("climb");
+                    StartCoroutine(Climb(hitInfo.point));
                     break;
                 case < 0.1f:
-                    Debug.Log("cant");
                     break;
             }
         }
     }
 
-    private IEnumerator Climb()
+    private IEnumerator Climb(Vector3 inputPos)
     {
-        Debug.Log("climbing");
-        isClimbing = true;
-        yield return new WaitForSeconds(2f);
-        isClimbing = false;
+        var currentLoc = transform.position;
 
+        var targetPos = new Vector3(currentLoc.x, inputPos.y, currentLoc.z);
+
+        var heightOffset = (controller.height/2 + 0.25f) * transform.up;
+        var forwarwdOffset =  transform.forward * 0.25f;
+
+        var offset = heightOffset + forwarwdOffset;
+
+        float climbTime = 2f;
+        float elapsedTime = 0f;
+
+        isClimbing = true;
+        controller.enabled = false;
+
+        while (elapsedTime < climbTime)
+        {
+            transform.position = Vector3.Lerp(currentLoc, targetPos + heightOffset, (elapsedTime / climbTime));
+            
+            elapsedTime += Time.deltaTime;
+            
+            yield return null;
+        }
+
+        transform.position = inputPos + offset;
+
+        controller.enabled = true;
+        isClimbing = false;
     }
 
-    private IEnumerator Vault()
+    private IEnumerator Vault(Vector3 inputPos)
     {
-        yield return new WaitForSeconds(1f);
+        var currentLoc = transform.position;
+
+        var targetPos = new Vector3(currentLoc.x, inputPos.y, currentLoc.z);
+
+        var offset = (controller.height / 2 + 0.5f) * Vector3.up;
+
+        float climbTime = 0.5f;
+        float elapsedTime = 0f;
+
+        isClimbing = true;
+        controller.enabled = false;
+
+        movement.enabled = false;
+
+        while (elapsedTime < climbTime)
+        {
+            transform.position = Vector3.Lerp(currentLoc, targetPos + offset, (elapsedTime / climbTime));
+
+            elapsedTime += Time.deltaTime;
+
+            yield return null;
+        }
+
+        transform.position = inputPos + offset;
+
+        controller.enabled = true;
+        isClimbing = false;
+        movement.enabled = true;
     }
 }

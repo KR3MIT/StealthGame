@@ -1,3 +1,5 @@
+using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +28,9 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!controller.enabled)
+            return;
+
         Movement();
         Gravity();
     }
@@ -39,7 +44,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Inputs()
     {
-        input.actions["Jump/Climb"].performed += ctx => Jump();
+        input.actions["Jump/Climb"].performed += ctx => StartCoroutine(Jump());
         input.actions["Walk"].performed += ctx => isWalking = true;
         input.actions["Walk"].canceled += ctx => isWalking = false;
     }
@@ -52,6 +57,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
+        if(climb.isClimbing)
+            return;
+
         var speed = isWalking ? walkSpeed : moveSpeed;
 
         Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
@@ -61,9 +69,11 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(moveVector * Time.deltaTime);
     }
 
-    private void Jump()
+    private IEnumerator Jump()
     {
-        if(controller.isGrounded && !climb.isClimbing)
+        yield return new WaitForEndOfFrame();
+
+        if (controller.isGrounded && !climb.isClimbing)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
