@@ -5,9 +5,10 @@ using UnityEngine.InputSystem;
 public class PlayerClimbing : MonoBehaviour
 {
     public LayerMask mask;
+    public float climbTime = 2f;
+    public float vaultTime = 1f;
 
     private PlayerInput input;
-    private PlayerMovement movement;
     private CharacterController controller;
 
     public float climbDistance { get; private set; }
@@ -19,16 +20,9 @@ public class PlayerClimbing : MonoBehaviour
         Inputs();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void Initialize()
     {
         input = GetComponent<PlayerInput>();
-        movement = GetComponent<PlayerMovement>();
         controller = GetComponent<CharacterController>();
     }
 
@@ -89,7 +83,7 @@ public class PlayerClimbing : MonoBehaviour
                 case > 3.5f:
                     break;
                 case > 3f:
-                    //StartCoroutine(Vault(hitInfo.point));
+                    StartCoroutine(Vault(hitInfo.point));
                     break;
                 case > 1f:
                     StartCoroutine(Climb(hitInfo.point));
@@ -111,7 +105,6 @@ public class PlayerClimbing : MonoBehaviour
 
         var offset = heightOffset + forwarwdOffset;
 
-        float climbTime = 2f;
         float elapsedTime = 0f;
 
         isClimbing = true;
@@ -138,19 +131,19 @@ public class PlayerClimbing : MonoBehaviour
 
         var targetPos = new Vector3(currentLoc.x, inputPos.y, currentLoc.z);
 
-        var offset = (controller.height / 2 + 0.5f) * Vector3.up;
+        var heightOffset = (controller.height / 2 + 0.25f) * transform.up;
+        var forwarwdOffset = transform.forward * 0.25f;
 
-        float climbTime = 0.5f;
+        var offset = heightOffset + forwarwdOffset;
+
         float elapsedTime = 0f;
 
         isClimbing = true;
         controller.enabled = false;
 
-        movement.enabled = false;
-
-        while (elapsedTime < climbTime)
+        while (elapsedTime < vaultTime)
         {
-            transform.position = Vector3.Lerp(currentLoc, targetPos + offset, (elapsedTime / climbTime));
+            transform.position = Vector3.Lerp(currentLoc, targetPos + heightOffset, (elapsedTime / vaultTime));
 
             elapsedTime += Time.deltaTime;
 
@@ -161,6 +154,5 @@ public class PlayerClimbing : MonoBehaviour
 
         controller.enabled = true;
         isClimbing = false;
-        movement.enabled = true;
     }
 }
