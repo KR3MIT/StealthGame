@@ -1,6 +1,5 @@
-using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
@@ -9,12 +8,18 @@ public class PlayerMovement : MonoBehaviour
     public float walkSpeed;
     public float jumpHeight;
     public float gravity;
+    public float acceleration = 10f; // Smoothing speed - higher = faster acceleration
+
+    public bool canJump;
+
+    public event System.Action OnJump;
 
     private CharacterController controller;
     private PlayerInput input;
-    private PlayerClimbing climb;
+    private PlayerClimbing climbing;
 
     private float verticalVelocity;
+    private Vector3 currentVelocity; // Current smoothed velocity
 
     public bool isWalking {  get; private set; }
 
@@ -39,12 +44,14 @@ public class PlayerMovement : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
-        climb = GetComponent<PlayerClimbing>();
+        climbing = GetComponent<PlayerClimbing>();
     }
 
     private void Inputs()
     {
-        input.actions["Jump/Climb"].performed += ctx => StartCoroutine(Jump());
+        if(canJump)
+            input.actions["Jump/Climb"].performed += ctx => StartCoroutine(Jump());
+        
         input.actions["Walk"].performed += ctx => isWalking = true;
         input.actions["Walk"].canceled += ctx => isWalking = false;
     }
@@ -57,25 +64,32 @@ public class PlayerMovement : MonoBehaviour
 
     private void Movement()
     {
-        if(climb.isClimbing)
+        if(climbing.isClimbing)
+        {
+            currentVelocity = Vector3.zero; // Reset velocity when climbing
             return;
+        }
 
         var speed = isWalking ? walkSpeed : moveSpeed;
 
         Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
-        Vector3 moveVector = transform.forward * inputVector.y + transform.right * inputVector.x;
-        moveVector *= speed;
+        Vector3 targetVelocity = transform.forward * inputVector.y + transform.right * inputVector.x;
+        targetVelocity *= speed;
 
-        controller.Move(moveVector * Time.deltaTime);
+        // Smoothly interpolate from current velocity to target velocity
+        currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, acceleration * Time.deltaTime);
+
+        controller.Move(currentVelocity * Time.deltaTime);
     }
 
     private IEnumerator Jump()
     {
         yield return new WaitForEndOfFrame();
 
-        if (controller.isGrounded && !climb.isClimbing)
+        if (controller.isGrounded && !climbing.isClimbing)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            OnJump?.Invoke();
         }
     }
 }

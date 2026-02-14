@@ -1,7 +1,7 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Unity.Cinemachine;
+using System.Collections;
+using UnityEngine.InputSystem;
 
 public class PlayerCameraRotation : MonoBehaviour
 {
@@ -9,11 +9,15 @@ public class PlayerCameraRotation : MonoBehaviour
     public float minPitch = -80f;
     public float maxPitch = 80f;
     public float lerpSpeed;
+    public float meshRotationSpeed = 10f; // Speed for mesh to follow camera rotation
 
     private Transform cameraOffset;
+    private Transform playerMesh;
 
     private CinemachineCamera cineCamera;
     private PlayerInput input;
+    private PlayerClimbing climbing;
+    private Animator animator;
     private Coroutine handednessCoroutine;
 
     private float pitch;
@@ -28,6 +32,7 @@ public class PlayerCameraRotation : MonoBehaviour
     void Update()
     {
         CameraRotation();
+        UpdateMeshRotation();
     }
 
     private void Initialize()
@@ -35,6 +40,9 @@ public class PlayerCameraRotation : MonoBehaviour
         cameraOffset = transform.GetChild(0);
         cineCamera = GetComponentInChildren<CinemachineCamera>();
         input = GetComponent<PlayerInput>();
+        climbing = GetComponent<PlayerClimbing>();
+        animator = GetComponentInChildren<Animator>();
+        playerMesh = animator.transform;
 
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -88,10 +96,25 @@ public class PlayerCameraRotation : MonoBehaviour
         pitch -= inputVector.y * sensitivity * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
 
-        // Yaw rotates the whole player body so movement stays aligned
+        // Always rotate the parent for camera control
         transform.Rotate(Vector3.up, yaw);
 
-        // Pitch only tilts the camera offset up/down
+        // Camera pitch always works independently
         cameraOffset.localRotation = Quaternion.Euler(pitch, 0f, 0f);
+    }
+
+    private void UpdateMeshRotation()
+    {
+        if (climbing.isClimbing)
+        {
+            // If climbing, lock mesh to climb direction
+            playerMesh.rotation = climbing.climbRotation;
+        }
+        else
+        {
+            // Smoothly rotate mesh to match parent rotation (camera yaw direction)
+            Quaternion targetRotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+            playerMesh.rotation = Quaternion.Lerp(playerMesh.rotation, targetRotation, meshRotationSpeed * Time.deltaTime);
+        }
     }
 }

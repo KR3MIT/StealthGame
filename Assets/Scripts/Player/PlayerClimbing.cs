@@ -1,18 +1,20 @@
-using System.Collections;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.InputSystem;
 
 public class PlayerClimbing : MonoBehaviour
 {
     public LayerMask mask;
-    public float climbTime = 2f;
-    public float vaultTime = 1f;
+    public float climbSpeed = 2f;
+    public float vaultSpeed = 1f;
+
+    public event System.Action OnClimb;
+    public event System.Action StopClimb;
 
     private PlayerInput input;
     private CharacterController controller;
-
-    public float climbDistance { get; private set; }
     public bool isClimbing { get; private set; } = false;
+    public Quaternion climbRotation { get; private set; } // Store climbing direction
 
     void Start()
     {
@@ -45,7 +47,7 @@ public class PlayerClimbing : MonoBehaviour
         {
             StopAllCoroutines();
             isClimbing = false;
-
+            StopClimb?.Invoke();
             StartCoroutine(SetStopPosition(currentPos));
         }
     }
@@ -54,7 +56,10 @@ public class PlayerClimbing : MonoBehaviour
     {
         controller.enabled = false;
         yield return new WaitForEndOfFrame();
-        transform.position = pos + new Vector3 (0, (controller.height / 2), 0);
+        var backwardsOffset = -transform.forward * 0.5f;
+        var heightOffset = (controller.height / 2) * transform.up;
+        var offset = backwardsOffset + heightOffset;
+        transform.position = pos + offset;
         controller.enabled = true;
     }
 
@@ -74,8 +79,6 @@ public class PlayerClimbing : MonoBehaviour
 
         Debug.DrawRay(transform.localPosition + offset, -transform.up * hitInfo.distance, Color.red, 4f);
 
-        climbDistance = hitInfo.distance;
-
         if (!isClimbing) 
         { 
             switch (hitInfo.distance)
@@ -83,9 +86,12 @@ public class PlayerClimbing : MonoBehaviour
                 case > 3.5f:
                     break;
                 case > 3f:
-                    StartCoroutine(Vault(hitInfo.point));
+
                     break;
                 case > 1f:
+                    isClimbing = true;
+                    climbRotation = transform.rotation; // Lock current rotation for climbing
+                    controller.enabled = false;
                     StartCoroutine(Climb(hitInfo.point));
                     break;
                 case < 0.1f:
@@ -96,30 +102,46 @@ public class PlayerClimbing : MonoBehaviour
 
     private IEnumerator Climb(Vector3 inputPos)
     {
-        var currentLoc = transform.position;
+        OnClimb?.Invoke();
 
-        var targetPos = new Vector3(currentLoc.x, inputPos.y, currentLoc.z);
+        var currentPos = transform.position;
 
         var heightOffset = (controller.height/2 + 0.25f) * transform.up;
-        var forwarwdOffset =  transform.forward * 0.25f;
+        var forwardOffset = transform.forward * 0.25f;
+        var offset = heightOffset + forwardOffset;
 
-        var offset = heightOffset + forwarwdOffset;
+        // Calculate startPos based on ledge position, not current player position
+        var ledgeHeight = inputPos.y - controller.height/2;
+        var startPos = new Vector3(inputPos.x, ledgeHeight, inputPos.z) - forwardOffset;
+        
+        var endPos = inputPos + offset;
 
         float elapsedTime = 0f;
 
-        isClimbing = true;
-        controller.enabled = false;
-
-        while (elapsedTime < climbTime)
+        // Phase 1: Move from currentPos to startPos (snap to ledge)
+        while (elapsedTime < climbSpeed / 2f)
         {
-            transform.position = Vector3.Lerp(currentLoc, targetPos + heightOffset, (elapsedTime / climbTime));
+            transform.position = Vector3.Lerp(currentPos, startPos, (elapsedTime / (climbSpeed / 2f)));
             
             elapsedTime += Time.deltaTime;
             
             yield return null;
         }
 
-        transform.position = inputPos + offset;
+        transform.position = startPos;
+        elapsedTime = 0f;
+
+        // Phase 2: Move from startPos to endPos (climb up and over)
+        while (elapsedTime < climbSpeed)
+        {
+            transform.position = Vector3.Lerp(startPos, endPos, (elapsedTime / (climbSpeed)));
+            
+            elapsedTime += Time.deltaTime;
+            
+            yield return null;
+        }
+
+        transform.position = endPos;
 
         controller.enabled = true;
         isClimbing = false;
@@ -131,26 +153,23 @@ public class PlayerClimbing : MonoBehaviour
 
         var targetPos = new Vector3(currentLoc.x, inputPos.y, currentLoc.z);
 
-        var heightOffset = (controller.height / 2 + 0.25f) * transform.up;
-        var forwarwdOffset = transform.forward * 0.25f;
-
-        var offset = heightOffset + forwarwdOffset;
+        var heightOffset = (controller.height / 2) * transform.up;
 
         float elapsedTime = 0f;
 
         isClimbing = true;
         controller.enabled = false;
 
-        while (elapsedTime < vaultTime)
+        while (elapsedTime < vaultSpeed)
         {
-            transform.position = Vector3.Lerp(currentLoc, targetPos + heightOffset, (elapsedTime / vaultTime));
+            transform.position = Vector3.Lerp(currentLoc, targetPos + heightOffset, (elapsedTime / vaultSpeed));
 
             elapsedTime += Time.deltaTime;
 
             yield return null;
         }
 
-        transform.position = inputPos + offset;
+        transform.position = inputPos;
 
         controller.enabled = true;
         isClimbing = false;

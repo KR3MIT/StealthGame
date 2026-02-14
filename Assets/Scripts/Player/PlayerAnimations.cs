@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using UnityEngine.InputSystem;
 
 public class PlayerAnimations : MonoBehaviour
@@ -39,7 +40,9 @@ public class PlayerAnimations : MonoBehaviour
 
     private void Inputs()
     {
-        input.actions["Jump/Climb"].performed += ctx => Jump();
+        movement.OnJump += () => animator.SetTrigger("Jump");
+        climbing.OnClimb += () => animator.SetTrigger("Climb");
+        climbing.StopClimb += () => animator.SetTrigger("StopClimb");
     }
 
     private void SetStates()
@@ -47,12 +50,6 @@ public class PlayerAnimations : MonoBehaviour
         animator.SetBool("IsGrounded", controller.isGrounded);
         animator.SetBool("isWalking", movement.isWalking);
         animator.SetBool("isClimbing", climbing.isClimbing);
-    }
-
-    private void Jump()
-    {
-        if(controller.isGrounded && !climbing.isClimbing)
-            animator.SetTrigger("Jump");
     }
 
     private void Movement()

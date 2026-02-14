@@ -1,7 +1,7 @@
-using System.Collections;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Unity.Cinemachine;
+using System.Collections;
+using UnityEngine.InputSystem;
 
 
 public class PlayerCameraBehaviour : MonoBehaviour
