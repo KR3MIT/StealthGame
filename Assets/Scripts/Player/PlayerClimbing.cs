@@ -8,6 +8,8 @@ public class PlayerClimbing : MonoBehaviour
     public float climbSpeed = 2f;
     public float vaultSpeed = 1f;
 
+    [HideInInspector] public int climbType = 0;
+
     public event System.Action OnClimb;
     public event System.Action StopClimb;
 
@@ -73,20 +75,35 @@ public class PlayerClimbing : MonoBehaviour
         if (upInfo.collider != null)
             return;
 
-        var offset = transform.rotation * new Vector3(0f, 3f, 0.5f);
+        var offset = transform.rotation * new Vector3(0f, 3f, 0.75f);
         
         var heightRay = Physics.Raycast(transform.localPosition + offset, -transform.up, out RaycastHit hitInfo, 5f, mask);
 
         Debug.DrawRay(transform.localPosition + offset, -transform.up * hitInfo.distance, Color.red, 4f);
 
-        if (!isClimbing) 
-        { 
+        bool canLand = false;
+
+        var offsetTwo = transform.rotation * new Vector3(0f, controller.height / 2, 1.75f);
+
+        var heightRayTwo = Physics.Raycast(transform.localPosition + offsetTwo, -transform.up, out RaycastHit hitInfoTwo, 2f, mask);
+
+        Debug.DrawRay(transform.localPosition + offsetTwo, -transform.up * 2f, Color.orange, 2f);
+
+        if(hitInfoTwo.collider != null) {canLand = true;}
+
+        var endPos = transform.localPosition + offsetTwo - new Vector3(0f, controller.height / 2, 0f);
+
+        if (!isClimbing)
+        {
             switch (hitInfo.distance)
             {
                 case > 3.5f:
                     break;
                 case > 3f:
-
+                    isClimbing = true;
+                    climbRotation = transform.rotation;
+                    controller.enabled = false;
+                    StartCoroutine(Vault(hitInfo.point, endPos, canLand));
                     break;
                 case > 1f:
                     isClimbing = true;
@@ -102,6 +119,7 @@ public class PlayerClimbing : MonoBehaviour
 
     private IEnumerator Climb(Vector3 inputPos)
     {
+        climbType = 0;
         OnClimb?.Invoke();
 
         var currentPos = transform.position;
@@ -147,29 +165,53 @@ public class PlayerClimbing : MonoBehaviour
         isClimbing = false;
     }
 
-    private IEnumerator Vault(Vector3 inputPos)
+    private IEnumerator Vault(Vector3 inputPos,Vector3 exitPos, bool canLand)
     {
-        var currentLoc = transform.position;
+        climbType = canLand ? 1 : 2;
+        OnClimb?.Invoke();
 
-        var targetPos = new Vector3(currentLoc.x, inputPos.y, currentLoc.z);
+        var currentPos = transform.position;
 
-        var heightOffset = (controller.height / 2) * transform.up;
+        var heightOffset = transform.up * 0.5f;
+        var forwardOffset = canLand ? (transform.forward * 0.25f) : (-transform.forward * 0.5f);
+        var offset = heightOffset + forwardOffset;
+
+        var middlePos = inputPos + offset;
+
+        var endPos = exitPos + ((transform.forward * 1.25f) + -transform.up * 0.25f);
 
         float elapsedTime = 0f;
 
-        isClimbing = true;
-        controller.enabled = false;
-
-        while (elapsedTime < vaultSpeed)
+        // Phase 1: Move from currentPos to startPos (snap to ledge)
+        while (elapsedTime < climbSpeed / 2f)
         {
-            transform.position = Vector3.Lerp(currentLoc, targetPos + heightOffset, (elapsedTime / vaultSpeed));
+            transform.position = Vector3.Lerp(currentPos, middlePos, (elapsedTime / (climbSpeed / 2f)));
 
             elapsedTime += Time.deltaTime;
 
             yield return null;
         }
 
-        transform.position = inputPos;
+        transform.position = middlePos;
+        elapsedTime = 0f;
+
+        if (!canLand)
+        {
+            while (elapsedTime < climbSpeed / 2f)
+            {
+                transform.position = Vector3.Lerp(middlePos, endPos, (elapsedTime / (climbSpeed)));
+
+                elapsedTime += Time.deltaTime;
+
+                yield return null;
+            }
+
+            transform.position = endPos;
+        }
+        else
+        {
+            transform.position = middlePos;
+        }
 
         controller.enabled = true;
         isClimbing = false;

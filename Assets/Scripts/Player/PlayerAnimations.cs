@@ -50,6 +50,7 @@ public class PlayerAnimations : MonoBehaviour
         animator.SetBool("IsGrounded", controller.isGrounded);
         animator.SetBool("isWalking", movement.isWalking);
         animator.SetBool("isClimbing", climbing.isClimbing);
+        animator.SetInteger("climbType", climbing.climbType);
     }
 
     private void Movement()
