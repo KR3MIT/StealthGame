@@ -6,90 +6,206 @@ public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed;
     public float walkSpeed;
-    public float jumpHeight;
+    public float proneSpeed;
+    public float diveVelocity;
+    public float diveDrag = 0.5f; // Friction that slows down dive over time (lower = faster dive)
+    public float diveUpwardVelocity = 0.2f; // Upward component of dive (lower = flatter trajectory)
+    public float minDiveVelocity = 0.5f; // Minimum velocity to stop dive (backup check)
+    public float minMovementVelocityForDive = 2f; // Minimum movement speed required to dive (prevents instant dive stop when slow)
     public float gravity;
-    public float acceleration = 10f; // Smoothing speed - higher = faster acceleration
+    public float acceleration = 10f;
 
-    public bool canJump;
+    public event System.Action OnDive;
 
-    public event System.Action OnJump;
+    private CharacterController cc; //CharacterController
+    private PlayerInput i; //PlayerInput
+    private PlayerController pc; //PlayerController
 
-    private CharacterController controller;
-    private PlayerInput input;
-    private PlayerClimbing climbing;
+    private Transform co; //cameraOffset
 
-    private float verticalVelocity;
-    private Vector3 currentVelocity; // Current smoothed velocity
+    private float mdv = 0.5f; // Minimum velocity to stop dive (backup check)
+    private float vv; //verticalVelocity
+    private float s; //speed
 
-    public bool isWalking {  get; private set; }
+    private Vector3 currentVelocity { get; set; }
+    private Vector3 diveVelocityVector; // Independent dive velocity
+    public bool isDiving { get; private set; }
+    public bool isWalking { get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Initialize();
         Inputs();
+
+        isDiving = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!controller.enabled)
-            return;
+        if (!cc.enabled) return;
 
-        Movement();
+        if (isDiving) 
+        { 
+            ApplyDiveMovement();
+            CheckDiveLanding();
+        }
+        else
+        {
+            Movement();
+        }
+
         Gravity();
     }
 
     private void Initialize()
     {
-        controller = GetComponent<CharacterController>();
-        input = GetComponent<PlayerInput>();
-        climbing = GetComponent<PlayerClimbing>();
+        cc = GetComponent<CharacterController>();
+        i = GetComponent<PlayerInput>();
+        pc = GetComponent<PlayerController>();
+        co = transform.GetChild(0);
+    }
+
+    private void DiveCheck()
+    {
+        if (cc.isGrounded)
+        {
+            isDiving = false;
+            currentVelocity = Vector3.zero;
+        }
+    }
+
+    private void ApplyDiveMovement()
+    {
+        // Apply drag/friction to the dive velocity
+        diveVelocityVector *= Mathf.Max(0, 1 - diveDrag * Time.deltaTime);
+
+        // Move based on independent dive velocity (ignores input)
+        cc.Move(diveVelocityVector * Time.deltaTime);
+    }
+
+    private void CheckDiveLanding()
+    {
+        // End dive if grounded or velocity is below minimum threshold
+        if (cc.isGrounded || diveVelocityVector.magnitude < minDiveVelocity)
+        {
+            isDiving = false;
+            diveVelocityVector = Vector3.zero;
+            // Don't reset currentVelocity here - let player have immediate control
+            vv = 0;
+            // Stay in Prone state, let player control transitions via input
+        }
     }
 
     private void Inputs()
     {
-        if(canJump)
-            input.actions["Jump/Climb"].performed += ctx => StartCoroutine(Jump());
-        
-        input.actions["Walk"].performed += ctx => isWalking = true;
-        input.actions["Walk"].canceled += ctx => isWalking = false;
+        i.actions["Jump/Dive"].performed += ctx => StartCoroutine(Dive());
+        i.actions["Walk"].performed += ctx => isWalking = true;
+        i.actions["Walk"].canceled += ctx => isWalking = false;
     }
 
     private void Gravity()
     {
-        verticalVelocity += gravity * Time.deltaTime;
-        controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
+        if (cc.isGrounded)
+        {
+            vv = 0;
+        }
+        else
+        {
+            vv += gravity * Time.deltaTime;
+        }
+        cc.Move(Vector3.up * vv * Time.deltaTime);
     }
 
     private void Movement()
     {
-        if(climbing.isClimbing)
+        if(pc.state == PlayerController.State.Climbing)
         {
-            currentVelocity = Vector3.zero; // Reset velocity when climbing
+            currentVelocity = Vector3.zero;
             return;
         }
 
-        var speed = isWalking ? walkSpeed : moveSpeed;
+        switch (pc.state)
+        {
+            case PlayerController.State.Standing:
+                s = isWalking? walkSpeed : moveSpeed;
+                break;
+            case PlayerController.State.Crouching:
+                s = walkSpeed; 
+                break;
+            case PlayerController.State.Prone:
+                s = proneSpeed;
+                break;
+        }
 
-        Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
-        Vector3 targetVelocity = transform.forward * inputVector.y + transform.right * inputVector.x;
-        targetVelocity *= speed;
+        Vector2 inputVector = i.actions["Movement"].ReadValue<Vector2>();
 
-        // Smoothly interpolate from current velocity to target velocity
+        Vector3 forward = co.forward;   
+        forward.y = 0;
+        forward = forward.normalized;
+
+        Vector3 right = co.right;
+
+        Vector3 targetVelocity = forward * inputVector.y + right * inputVector.x;
+        targetVelocity *= s;
+
         currentVelocity = Vector3.Lerp(currentVelocity, targetVelocity, acceleration * Time.deltaTime);
 
-        controller.Move(currentVelocity * Time.deltaTime);
+        cc.Move(currentVelocity * Time.deltaTime);
     }
 
-    private IEnumerator Jump()
+    private IEnumerator Dive()
     {
         yield return new WaitForEndOfFrame();
 
-        if (controller.isGrounded && !climbing.isClimbing)
+        // Only allow dive from Standing or Crouching
+        if(pc.state != PlayerController.State.Standing && pc.state != PlayerController.State.Crouching)
         {
-            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            OnJump?.Invoke();
+            yield break;
         }
+
+        if(isDiving)
+        {
+            yield break;
+        }
+
+        // Require minimum movement velocity to perform dive
+        if (currentVelocity.magnitude < minMovementVelocityForDive)
+        {
+            yield break;
+        }
+
+        pc.SetPlayerState(PlayerController.State.Prone);
+
+        isDiving = true;
+
+        Vector2 inputVector = i.actions["Movement"].ReadValue<Vector2>();
+
+        // Use only horizontal directions, ignore vertical camera rotation
+        Vector3 forward = co.forward;
+        forward.y = 0;
+        forward = forward.normalized;
+
+        Vector3 right = co.right;
+
+        Vector3 diveDirection = forward * inputVector.y + right * inputVector.x;
+
+        // If no input, dive forward
+        if (diveDirection.magnitude < 0.1f)
+        {
+            diveDirection = forward * diveVelocity;
+        }
+        else
+        {
+            diveDirection = diveDirection.normalized * diveVelocity;
+        }
+
+        // Set independent dive velocity
+        vv = diveUpwardVelocity; // Add upward velocity component (lower = flatter dive)
+        diveVelocityVector = diveDirection;
+        currentVelocity = Vector3.zero; // Reset normal movement velocity
+
+        OnDive?.Invoke();
     }
 }

@@ -52,7 +52,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Jump/Climb",
+                    "name": "Jump/Dive",
                     "type": "Button",
                     "id": "66494693-a60a-4bd6-ba97-d1fa47547597",
                     "expectedControlType": "",
@@ -176,7 +176,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Jump/Climb",
+                    "action": "Jump/Dive",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

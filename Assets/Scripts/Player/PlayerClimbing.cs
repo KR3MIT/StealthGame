@@ -32,7 +32,7 @@ public class PlayerClimbing : MonoBehaviour
 
     private void Inputs()
     {
-        input.actions["Jump/Climb"].performed += ctx => ClimbCheck();
+        input.actions["Jump/Dive"].performed += ctx => ClimbCheck();
         input.actions["Movement"].performed += ctx => CancelClimb();
     }
 

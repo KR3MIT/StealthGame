@@ -4,16 +4,12 @@ using UnityEngine.InputSystem;
 
 public class PlayerAnimations : MonoBehaviour
 {
-    public float animSmoothSpeed = 10f;
-
-    private Animator animator;
-    private PlayerInput input;
-    private CharacterController controller;
-    private PlayerMovement movement;
-    private PlayerClimbing climbing;
-
-    private float smoothMoveX;
-    private float smoothMoveY;
+    private Animator a; //animator
+    private Transform m; //playerMesh
+    private CharacterController cc; //characterController
+    private PlayerMovement pm; //movement
+    private PlayerClimbing c; //climbing
+    private PlayerController pc; //playerController
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -31,46 +27,55 @@ public class PlayerAnimations : MonoBehaviour
 
     private void Initialize()
     {
-        animator = GetComponentInChildren<Animator>();
-        input = GetComponent<PlayerInput>();
-        controller = GetComponent<CharacterController>();
-        movement = GetComponent<PlayerMovement>();
-        climbing = GetComponent<PlayerClimbing>();
+        a = GetComponentInChildren<Animator>();
+        m = a.transform;
+        cc = GetComponent<CharacterController>();
+        pm = GetComponent<PlayerMovement>();
+        c = GetComponent<PlayerClimbing>();
+        pc = GetComponent<PlayerController>();
     }
 
     private void Inputs()
     {
-        movement.OnJump += () => animator.SetTrigger("Jump");
-        climbing.OnClimb += () => animator.SetTrigger("Climb");
-        climbing.StopClimb += () => animator.SetTrigger("StopClimb");
+        pm.OnDive += () => a.SetTrigger("Dive");
+        c.OnClimb += () => a.SetTrigger("Climb");
+        c.StopClimb += () => a.SetTrigger("StopClimb");
     }
 
     private void SetStates()
     {
-        animator.SetBool("IsGrounded", controller.isGrounded);
-        animator.SetBool("isWalking", movement.isWalking);
-        animator.SetBool("isClimbing", climbing.isClimbing);
-        animator.SetInteger("climbType", climbing.climbType);
+        bool isCrouching = pc.state == PlayerController.State.Crouching;
+        bool isProne = pc.state == PlayerController.State.Prone;
+        bool isClimbing = pc.state == PlayerController.State.Climbing;
+        bool isCarrying = pc.state == PlayerController.State.Carrying;
+        bool isFalling = pc.state == PlayerController.State.Falling;
+
+        a.SetBool("isCrouching", isCrouching);
+        a.SetBool("isProne", isProne);
+        a.SetBool("isClimbing", isClimbing);
+        a.SetBool("isCarrying", isCarrying);
+        a.SetBool("isFalling", isFalling);
     }
 
     private void Movement()
     {
-        if (climbing.isClimbing)
-            return;
+
+        //if (c.isClimbing)
+        //    return;
         
-        var speedModifier = movement.isWalking ? 0f : 1f;
+        //var speedModifier = pm.isWalking ? 0f : 1f;
 
-        Vector2 inputVector = input.actions["Movement"].ReadValue<Vector2>();
+        //Vector2 inputVector = i.actions["Movement"].ReadValue<Vector2>();
 
-        animator.SetBool("IsMoving", inputVector.magnitude > 0.1f);
+        //a.SetBool("IsMoving", inputVector.magnitude > 0.1f);
 
-        float targetX = inputVector.x + inputVector.x * speedModifier;
-        float targetY = inputVector.y + inputVector.y * speedModifier;
+        //float targetX = inputVector.x + inputVector.x * speedModifier;
+        //float targetY = inputVector.y + inputVector.y * speedModifier;
 
-        smoothMoveX = Mathf.Lerp(smoothMoveX, targetX, animSmoothSpeed * Time.deltaTime);
-        smoothMoveY = Mathf.Lerp(smoothMoveY, targetY, animSmoothSpeed * Time.deltaTime);
+        //smoothMoveX = Mathf.Lerp(smoothMoveX, targetX, animSmoothSpeed * Time.deltaTime);
+        //smoothMoveY = Mathf.Lerp(smoothMoveY, targetY, animSmoothSpeed * Time.deltaTime);
 
-        animator.SetFloat("MoveX", smoothMoveX);
-        animator.SetFloat("MoveY", smoothMoveY);
+        //a.SetFloat("MoveX", smoothMoveX);
+        //a.SetFloat("MoveY", smoothMoveY);
     }
 }
