@@ -560,7 +560,7 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 9
-  climbSpeed: 5
+  climbSpeed: 4
   vaultSpeed: 2
 --- !u!114 &329947997
 MonoBehaviour:

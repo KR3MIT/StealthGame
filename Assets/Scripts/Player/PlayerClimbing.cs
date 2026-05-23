@@ -14,6 +14,7 @@ public class PlayerClimbing : MonoBehaviour
 
     public bool isClimbing { get; private set; } = false;
     public float climbType { get; private set; }
+    public Vector3 flatDir { get; private set; }
     public Quaternion climbRotation { get; private set; }
 
     private PlayerInput input;
@@ -91,70 +92,88 @@ public class PlayerClimbing : MonoBehaviour
             return;
 
         // Check if there's space above the player to climb
-        var upCheckPos = transform.localPosition + new Vector3(0f, controller.height/2, 0f);
+        var upCheckPos = transform.localPosition + new Vector3(0f, controller.height / 2, 0f);
         Physics.Raycast(upCheckPos, transform.up, out RaycastHit upInfo, 1f, mask);
+        Debug.DrawRay(upCheckPos, transform.up, Color.blue, controller.height / 2);
 
         if (upInfo.collider != null)
             return;
 
-        // Check for a ledge in front of the player
-        var forward = (transform.rotation = Quaternion.Euler(0, cameraOffset.rotation.eulerAngles.y, 0)).normalized;
-        var offset = Vector3.zero;
+        // Flatten the camera's forward to the horizontal plane only
+        Vector3 flatForward = cameraOffset.forward;
+        flatForward.y = 0f;
+        flatForward.Normalize();
+
+        flatDir = flatForward;
+
+        var heightOffset = transform.up * 3f;
+
+        var offset = (flatDir * (controller.radius * 2f)) + heightOffset;
 
         var heightRay = Physics.Raycast(transform.localPosition + offset, -transform.up, out RaycastHit hitInfo, 5f, mask);
         Debug.DrawRay(transform.localPosition + offset, -transform.up * hitInfo.distance, Color.red, 5f);
 
-        Debug.Log(hitInfo.distance);
+        var wallHeight = hitInfo.distance;
 
         // Check if the ledge is climbable based on distance
-        if (!isClimbing)
+        if (!isClimbing || heightRay == false)
         {
-            switch (hitInfo.distance)
-            {
-                case > 1f:
-                    Debug.Log("climbing");
-                    break;
-                
-            }
+            if (wallHeight < 0.5f)
+                return;
+            
+            else if (wallHeight >= 1f && wallHeight < 2.5f)
+                StartCoroutine(Climb(hitInfo.point, climbSpeed, 0));
+            
+            else if (wallHeight >= 2.5f && wallHeight < 3.5f)
+                StartCoroutine(Climb(hitInfo.point, vaultSpeed, 1));
+            
+            else
+                return;
         }
     }
 
-    private IEnumerator Climb(Vector3 inputPos)
+    private IEnumerator Climb(Vector3 inputPos, float climbSpeed, int climbtype)
     {
+        var inputState = playerController.state;
+
         playerController.state = PlayerController.State.Climbing;
 
-        climbType = 0;
+        climbType = climbtype;
         OnClimb?.Invoke();
-        transform.rotation = Quaternion.Euler(0, cameraOffset.rotation.eulerAngles.y, 0);
 
         float elapsedTime = 0f;
 
         var currentPos = transform.position;
 
-        var heightOffset = inputPos + (controller.height/2 + 0.1f) * transform.up;
+        var forwardOffset = inputPos - (flatDir * controller.radius * 2f);
 
-        var forwardOffset = inputPos + transform.forward * 0.25f;
+        forwardOffset.y = 0f;
 
-        var heightPos = currentPos + heightOffset;
+        var heightOffset = transform.up * (inputPos.y + ((controller.height / 2f) + 0.1f));
+
+        var heightPos = forwardOffset + heightOffset;
 
         // Phase 1: Move from currentPos to heightPos (climb up)
         while (elapsedTime < climbSpeed / 2f)
         {
             transform.position = Vector3.Lerp(currentPos, heightPos, (elapsedTime / (climbSpeed / 2f)));
+
             elapsedTime += Time.deltaTime;
+
             yield return null;
         }
 
         transform.position = heightPos;
-        currentPos = transform.position;
+
+        var forwardPos = inputPos + (transform.up * ((controller.height / 2) + 0.1f));
+
         elapsedTime = 0f;
 
-        var forwardPos = currentPos + forwardOffset;
-
-        // Phase 2: Move from heightPos to forwardPos (move forward onto ledge)
-        while (elapsedTime < climbSpeed / 2f)
+        // Phase 2: Move from heightPos to endPos (climb over)
+        while (elapsedTime < climbSpeed / 2)
         {
-            transform.position = Vector3.Lerp(currentPos, forwardPos, (elapsedTime / (climbSpeed / 2f)));
+            transform.position = Vector3.Lerp(heightPos, forwardPos, (elapsedTime / climbSpeed));
+
             elapsedTime += Time.deltaTime;
 
             yield return null;
@@ -166,14 +185,10 @@ public class PlayerClimbing : MonoBehaviour
 
         controller.enabled = true;
         isClimbing = false;
-
-        playerController.state = PlayerController.State.Standing;
+        playerController.state = inputState;
     }
 
-    private IEnumerator Vault(Vector3 inputPos)
-    {
-        yield return null;
-    }
+    //yield return new WaitForEndOfFrame();
 
     //private IEnumerator Climb(Vector3 inputPos)
     //{
