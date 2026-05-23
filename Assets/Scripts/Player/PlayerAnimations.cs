@@ -1,15 +1,14 @@
 using UnityEngine;
-using System.Collections;
-using UnityEngine.InputSystem;
 
 public class PlayerAnimations : MonoBehaviour
 {
-    private Animator a; //animator
-    private Transform m; //playerMesh
-    private CharacterController cc; //characterController
-    private PlayerMovement pm; //movement
-    private PlayerClimbing c; //climbing
-    private PlayerController pc; //playerController
+    private Animator animator;
+    private Transform mesh;
+    private CharacterController controller;
+    private PlayerController playerController;
+    private PlayerMovement movement;
+    private PlayerClimbing climbing;
+    private PlayerDiving diving;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -27,39 +26,37 @@ public class PlayerAnimations : MonoBehaviour
 
     private void Initialize()
     {
-        a = GetComponentInChildren<Animator>();
-        m = a.transform;
-        cc = GetComponent<CharacterController>();
-        pm = GetComponent<PlayerMovement>();
-        c = GetComponent<PlayerClimbing>();
-        pc = GetComponent<PlayerController>();
+        animator = GetComponentInChildren<Animator>();
+        mesh = animator.transform;
+        controller = GetComponent<CharacterController>();
+        movement = GetComponent<PlayerMovement>();
+        climbing = GetComponent<PlayerClimbing>();
+        playerController = GetComponent<PlayerController>();
+        diving = GetComponent<PlayerDiving>();
     }
 
     private void Inputs()
     {
-        pm.OnDive += () => a.SetTrigger("Dive");
-        c.OnClimb += () => a.SetTrigger("Climb");
-        c.StopClimb += () => a.SetTrigger("StopClimb");
+        diving.OnDive += () => animator.SetTrigger("Dive");
+        climbing.OnClimb += () => animator.SetTrigger("Climb");
+        climbing.StopClimb += () => animator.SetTrigger("StopClimb");
     }
 
     private void SetStates()
     {
-        bool isCrouching = pc.state == PlayerController.State.Crouching;
-        bool isProne = pc.state == PlayerController.State.Prone;
-        bool isClimbing = pc.state == PlayerController.State.Climbing;
-        bool isCarrying = pc.state == PlayerController.State.Carrying;
-        bool isFalling = pc.state == PlayerController.State.Falling;
+        bool isCrouching = playerController.state == PlayerController.State.Crouching;
+        bool isProne = playerController.state == PlayerController.State.Prone;
+        bool isClimbing = playerController.state == PlayerController.State.Climbing;
+        bool isCarrying = playerController.state == PlayerController.State.Carrying;
 
-        a.SetBool("isCrouching", isCrouching);
-        a.SetBool("isProne", isProne);
-        a.SetBool("isClimbing", isClimbing);
-        a.SetBool("isCarrying", isCarrying);
-        a.SetBool("isFalling", isFalling);
+        animator.SetBool("isCrouching", isCrouching);
+        animator.SetBool("isProne", isProne);
+        animator.SetBool("isClimbing", isClimbing);
+        animator.SetBool("isCarrying", isCarrying);
     }
 
     private void Movement()
     {
-
         //if (c.isClimbing)
         //    return;
         

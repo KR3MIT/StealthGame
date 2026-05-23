@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
@@ -9,60 +10,76 @@ public class PlayerController : MonoBehaviour
         Crouching,
         Prone,
         Climbing,
-        Carrying,
-        Falling
+        Carrying
     }
 
     public State state;
 
-    private CharacterController cc; //charactercontroller
-    private PlayerInput i; //playerinput
-    private PlayerMovement pm; //playermovement
+    private CharacterController controller;
+    private PlayerInput input;
+    private PlayerMovement movement;
+    private PlayerDiving diving;
+    private PlayerClimbing climbing;
 
-    private float targetHeight;
-    private float heightLerpSpeed = 10f; // Speed of height transition (higher = faster)
+    private float elapsedDiveTime;
+    private float elapsedTime;
+    private float stateChangeDelay = 0.25f; 
+    private float verticalVelocity;
 
-    private bool isCrouching;
-    private bool isProne;
-    private bool isCarrying;
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+
         Initialize();
-        SetPlayerState(State.Standing); // Set default state
     }
 
-    // Update is called once per frame
+    public void Initialize()
+    {
+
+        controller = GetComponent<CharacterController>();
+        input = GetComponent<PlayerInput>();
+        movement = GetComponent<PlayerMovement>();
+        diving = GetComponent<PlayerDiving>();
+        climbing = GetComponent<PlayerClimbing>();
+
+        elapsedDiveTime = 0f;
+        elapsedTime = 0f;
+
+        SetPlayerState(State.Standing);
+
+        input.actions["Crouch"].performed += ctx => HandleCrouchInput();
+        input.actions["Prone"].performed += ctx => HandleProneInput();
+    }
+
     void Update()
     {
-        // Only check for falling if we have a reference to PlayerMovement
-        if (pm == null) return;
+        elapsedDiveTime += Time.deltaTime;
+        elapsedTime += Time.deltaTime;
 
-        // Handle pose state changes (crouch/prone)
-        HandlePoseInput();
-
-        // Lerp the character controller height towards target height
-        if (cc.height != targetHeight)
-        {
-            cc.height = Mathf.Lerp(cc.height, targetHeight, heightLerpSpeed * Time.deltaTime);
-        }
+        Gravity();
     }
-
-    private void Initialize()
+    private void Gravity()
     {
-        cc = GetComponent<CharacterController>();
-        i = GetComponent<PlayerInput>();
-        pm = GetComponent<PlayerMovement>();
+        if (controller.isGrounded)
+        {
+            verticalVelocity = 0;
+        }
+        else
+        {
+            verticalVelocity += Physics.gravity.y * Time.deltaTime;
+        }
 
-        i.actions["Crouch"].performed += ctx => HandleCrouchInput();
-        i.actions["Prone"].performed += ctx => HandleProneInput();
+        controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
     }
+
+    #region chatslop
 
     private void HandleCrouchInput()
     {
-        // Don't allow state changes while diving
-        if (pm.isDiving) return;
+        if(elapsedTime < stateChangeDelay)
+            return;
+
+        if (diving.isDiving || state == State.Climbing) 
+            return;
 
         if (state == State.Standing)
         {
@@ -76,12 +93,17 @@ public class PlayerController : MonoBehaviour
         {
             SetPlayerState(State.Crouching);
         }
+        
+        elapsedTime = 0f;
     }
 
     private void HandleProneInput()
     {
-        // Don't allow state changes while diving
-        if (pm.isDiving) return;
+        if (elapsedTime < stateChangeDelay)
+            return;
+
+        if (diving.isDiving || state == State.Carrying || state == State.Climbing) 
+            return;
 
         if (state == State.Standing)
         {
@@ -95,37 +117,55 @@ public class PlayerController : MonoBehaviour
         {
             SetPlayerState(State.Prone);
         }
+
+        elapsedTime = 0f;
     }
 
-    private void HandlePoseInput()
-    {
-        // This is called in Update to handle pose state transitions
-        // The actual input handling is done in the input callbacks above
-    }
+    #endregion
 
     public void SetPlayerState(State newState)
     {
+        StopAllCoroutines();
+
         switch (newState)
         {
             case State.Standing:
-                targetHeight = 2.0f;
+                StartCoroutine(SetHeight(2.0f,0.5f)); 
+                
                 break;
+
             case State.Crouching:
-                targetHeight = 1.0f;
+                StartCoroutine(SetHeight(1.0f,0.5f));
+                
                 break;
+
             case State.Prone:
-                targetHeight = 0.5f;
+                StartCoroutine(SetHeight(0.5f,0.5f));
+                
                 break;
+
             case State.Climbing:
-                // Set parameters for climbing
+
                 break;
+
             case State.Carrying:
-                // Set parameters for carrying
-                break;
-            case State.Falling:
-                // Falling is now only a visual feature, no state logic needed
+
                 break;
         }
         this.state = newState;
+    }
+
+    private IEnumerator SetHeight(float targetHeight, float speed)
+    {
+        elapsedDiveTime = 0f;
+
+        while (elapsedDiveTime < speed)
+        {
+            elapsedDiveTime += Time.deltaTime;
+            controller.height = Mathf.Lerp(controller.height, targetHeight, (elapsedDiveTime / speed));
+            yield return null;
+        }
+
+        controller.height = targetHeight; 
     }
 }
