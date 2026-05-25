@@ -89,8 +89,6 @@ public class PlayerClimbing : MonoBehaviour
 
     private void ClimbCheck()
     {
-        Debug.Log("climb check");
-
         if (playerController.state != PlayerController.State.Standing && playerController.state != PlayerController.State.Crouching)
             return;
 
@@ -157,9 +155,9 @@ public class PlayerClimbing : MonoBehaviour
         var heightPos = forwardOffset + heightOffset;
 
         // Phase 1: Move from currentPos to heightPos (climb up)
-        while (elapsedTime < climbSpeed / 2f)
+        while (elapsedTime < climbSpeed)
         {
-            transform.position = Vector3.Lerp(currentPos, heightPos, (elapsedTime / (climbSpeed / 2f)));
+            transform.position = Vector3.Lerp(currentPos, heightPos, (elapsedTime / climbSpeed));
 
             elapsedTime += Time.deltaTime;
 
@@ -173,9 +171,9 @@ public class PlayerClimbing : MonoBehaviour
         elapsedTime = 0f;
 
         // Phase 2: Move from heightPos to endPos (climb over)
-        while (elapsedTime < climbSpeed / 2)
+        while (elapsedTime < (climbSpeed / 2f))
         {
-            transform.position = Vector3.Lerp(heightPos, forwardPos, (elapsedTime / climbSpeed));
+            transform.position = Vector3.Lerp(heightPos, forwardPos, (elapsedTime / (climbSpeed / 2f)));
 
             elapsedTime += Time.deltaTime;
 

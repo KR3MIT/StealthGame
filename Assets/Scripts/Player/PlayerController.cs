@@ -18,9 +18,7 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController controller;
     private PlayerInput input;
-    private PlayerMovement movement;
     private PlayerDiving diving;
-    private PlayerClimbing climbing;
 
     private float elapsedDiveTime;
     private float elapsedTime;
@@ -41,19 +39,16 @@ public class PlayerController : MonoBehaviour
 
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
-        movement = GetComponent<PlayerMovement>();
         diving = GetComponent<PlayerDiving>();
-        climbing = GetComponent<PlayerClimbing>();
 
         elapsedDiveTime = 0f;
         elapsedTime = 0f;
 
-        SetPlayerState(State.Standing);
+        SetPlayerState(State.Crouching);
 
         input.actions["Crouch"].performed += ctx => HandleCrouchInput();
         input.actions["Prone"].performed += ctx => HandleProneInput();
         input.actions["Climb/Dive"].performed += ctx => HandleClimbDiveInput(ctx);
-
     }
 
     void Update()
@@ -77,8 +72,6 @@ public class PlayerController : MonoBehaviour
         controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
     }
 
-    #region chatslop
-
     public void HandleClimbDiveInput(InputAction.CallbackContext ctx)
     {
         if (ctx.interaction is PressInteraction)
@@ -87,6 +80,8 @@ public class PlayerController : MonoBehaviour
         else if (ctx.interaction is MultiTapInteraction)
             OnDive.Invoke();
     }
+
+    #region chatslop
 
     private void HandleCrouchInput()
     {
@@ -146,25 +141,21 @@ public class PlayerController : MonoBehaviour
         {
             case State.Standing:
                 StartCoroutine(SetHeight(2.0f,0.5f)); 
-                
                 break;
 
             case State.Crouching:
-                StartCoroutine(SetHeight(1.0f,0.5f));
-                
+                StartCoroutine(SetHeight(1.0f,0.5f)); 
                 break;
 
             case State.Prone:
-                StartCoroutine(SetHeight(0.5f,0.5f));
-                
+                StartCoroutine(SetHeight(0.5f,0.5f)); 
                 break;
 
-            case State.Climbing:
-
+            case State.Climbing: 
                 break;
 
-            case State.Carrying:
-
+            case State.Carrying: 
+                StartCoroutine(SetHeight(2.0f,0.5f));
                 break;
         }
         this.state = newState;

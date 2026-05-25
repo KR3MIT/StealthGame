@@ -448,6 +448,7 @@ MonoBehaviour:
   walkSpeed: 2
   proneSpeed: 1
   acceleration: 10
+  speed: 0
   currentVelocity: {x: 0, y: 0, z: 0}
 --- !u!143 &329947991
 CharacterController:
@@ -560,7 +561,7 @@ MonoBehaviour:
   mask:
     serializedVersion: 2
     m_Bits: 9
-  climbSpeed: 2
+  climbSpeed: 1
   vaultSpeed: 1
 --- !u!114 &329947997
 MonoBehaviour:

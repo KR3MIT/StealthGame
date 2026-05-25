@@ -16,7 +16,7 @@ public class PlayerMovement : MonoBehaviour
 
     private Transform cameraOffset;
 
-    private float speed;
+    public float speed;
 
     [HideInInspector]
     public Vector3 currentVelocity;
@@ -32,7 +32,10 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!diving.isDiving && playerController.state == PlayerController.State.Crouching || playerController.state == PlayerController.State.Standing) 
+        if (!diving.isDiving && (
+            playerController.state == PlayerController.State.Crouching || 
+            playerController.state == PlayerController.State.Standing || 
+            playerController.state == PlayerController.State.Prone )) 
             Movement();
     }
 
