@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
-using Unity.VisualScripting;
 
 public class PlayerClimbing : MonoBehaviour
 {
@@ -40,7 +39,7 @@ public class PlayerClimbing : MonoBehaviour
 
     private void Inputs()
     {
-        input.actions["Jump/Dive"].performed += ctx => ClimbCheck();
+        playerController.OnClimb += () => ClimbCheck();
         input.actions["Movement"].performed += ctx => CancelClimb();
     }
 
@@ -55,9 +54,8 @@ public class PlayerClimbing : MonoBehaviour
 
         if (inputVector.y < 0f)
         {
-            StopAllCoroutines();
-            isClimbing = false;
             StopClimb?.Invoke();
+            StopAllCoroutines();
             StartCoroutine(SetStopPosition(currentPos, 1f));
         }
     }
@@ -68,7 +66,7 @@ public class PlayerClimbing : MonoBehaviour
 
         float elapsedTime = 0f;
 
-        var backwardsOffset = controller.radius * -transform.forward;
+        var backwardsOffset = controller.radius * -flatDir;
         var heightOffset = (controller.height / 2) * transform.up;
         var endPos = backwardsOffset + heightOffset;
 
@@ -77,17 +75,22 @@ public class PlayerClimbing : MonoBehaviour
         while (elapsedTime < duration)
         {
             transform.position = Vector3.Lerp(pos, endPos, (elapsedTime / duration));
-
             elapsedTime += Time.deltaTime;
         }
 
         yield return new WaitForEndOfFrame();
+
+        isClimbing = false;
+
+        playerController.state = PlayerController.State.Standing;
 
         controller.enabled = true;
     }
 
     private void ClimbCheck()
     {
+        Debug.Log("climb check");
+
         if (playerController.state != PlayerController.State.Standing && playerController.state != PlayerController.State.Crouching)
             return;
 

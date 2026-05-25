@@ -54,7 +54,7 @@ public class PlayerDiving : MonoBehaviour
     }
     private void Inputs()
     {
-        input.actions["Jump/Dive"].performed += ctx => StartCoroutine(Dive());
+        playerController.OnDive += () => StartCoroutine(Dive());
     }
 
     private void ApplyDiveMovement()

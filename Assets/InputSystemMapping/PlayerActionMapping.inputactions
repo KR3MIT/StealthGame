@@ -52,7 +52,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Jump/Dive",
+                    "name": "Climb/Dive",
                     "type": "Button",
                     "id": "66494693-a60a-4bd6-ba97-d1fa47547597",
                     "expectedControlType": "",
@@ -173,10 +173,10 @@
                     "name": "",
                     "id": "50fb2b8c-be7b-4b8d-b249-f682e28f40f4",
                     "path": "<Keyboard>/space",
-                    "interactions": "",
+                    "interactions": "Press,MultiTap",
                     "processors": "",
                     "groups": "",
-                    "action": "Jump/Dive",
+                    "action": "Climb/Dive",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

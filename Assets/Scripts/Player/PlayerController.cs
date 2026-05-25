@@ -1,6 +1,7 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Interactions;
 
 public class PlayerController : MonoBehaviour
 {
@@ -26,6 +27,9 @@ public class PlayerController : MonoBehaviour
     private float stateChangeDelay = 0.25f; 
     private float verticalVelocity;
 
+    public event System.Action OnDive;
+    public event System.Action OnClimb;
+
     void Start()
     {
 
@@ -48,6 +52,8 @@ public class PlayerController : MonoBehaviour
 
         input.actions["Crouch"].performed += ctx => HandleCrouchInput();
         input.actions["Prone"].performed += ctx => HandleProneInput();
+        input.actions["Climb/Dive"].performed += ctx => HandleClimbDiveInput(ctx);
+
     }
 
     void Update()
@@ -72,6 +78,15 @@ public class PlayerController : MonoBehaviour
     }
 
     #region chatslop
+
+    public void HandleClimbDiveInput(InputAction.CallbackContext ctx)
+    {
+        if (ctx.interaction is PressInteraction)
+            OnClimb.Invoke();
+
+        else if (ctx.interaction is MultiTapInteraction)
+            OnDive.Invoke();
+    }
 
     private void HandleCrouchInput()
     {
