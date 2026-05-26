@@ -19,7 +19,7 @@ public class PlayerClimbing : MonoBehaviour
     private PlayerInput input;
     private CharacterController controller;
     private PlayerController playerController;
-    
+
     private Transform cameraOffset;
 
     void Start()

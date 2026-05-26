@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerAnimations : MonoBehaviour
 {
@@ -9,19 +10,25 @@ public class PlayerAnimations : MonoBehaviour
     private PlayerMovement movement;
     private PlayerClimbing climbing;
     private PlayerDiving diving;
+    private PlayerInput input;
+
+    private float rotationSpeed = 720f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Initialize();
-        Inputs();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Movement();
-        SetStates();
+        if(playerController.isAiming)
+            AimMovement();
+        else
+            Movement();
+
+        SetStance();
     }
 
     private void Initialize()
@@ -33,6 +40,9 @@ public class PlayerAnimations : MonoBehaviour
         climbing = GetComponent<PlayerClimbing>();
         playerController = GetComponent<PlayerController>();
         diving = GetComponent<PlayerDiving>();
+        input = GetComponent<PlayerInput>();
+
+        Inputs();
     }
 
     private void Inputs()
@@ -40,26 +50,40 @@ public class PlayerAnimations : MonoBehaviour
         diving.OnDive += () => animator.SetTrigger("Dive");
         climbing.OnClimb += () => animator.SetTrigger("Climb");
         climbing.StopClimb += () => animator.SetTrigger("StopClimb");
+
+        input.actions["SecondaryAction"].performed += ctx => SetAim();
+        input.actions["SecondaryAction"].canceled += ctx => SetAim();
     }
 
-    private void SetStates()
+    private void SetStance()
     {
-        bool isCrouching = playerController.state == PlayerController.State.Crouching;
-        bool isProne = playerController.state == PlayerController.State.Prone;
-        bool isClimbing = playerController.state == PlayerController.State.Climbing;
-        bool isCarrying = playerController.state == PlayerController.State.Carrying;
+        animator.SetBool("isCrouching", playerController.state == PlayerController.State.Crouching);
+        animator.SetBool("isProne", playerController.state == PlayerController.State.Prone);
+        animator.SetBool("isClimbing", playerController.state == PlayerController.State.Climbing);
+        animator.SetBool("isCarrying", playerController.state == PlayerController.State.Carrying);
+        animator.SetBool("isGrounded", controller.isGrounded);
+    }
 
-        animator.SetBool("isCrouching", isCrouching);
-        animator.SetBool("isProne", isProne);
-        animator.SetBool("isClimbing", isClimbing);
-        animator.SetBool("isCarrying", isCarrying);
+    private void SetAim()
+    {
+        animator.SetBool("isAiming", playerController.isAiming);
     }
 
     private void Movement()
     {
+        Vector3 velocity = movement.currentVelocity;
+
+        Vector3 flatVelocity = new Vector3(velocity.x, 0f, velocity.z);
+
+        if (flatVelocity.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(flatVelocity);
+            mesh.rotation = Quaternion.RotateTowards(mesh.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+
         //if (c.isClimbing)
         //    return;
-        
+
         //var speedModifier = pm.isWalking ? 0f : 1f;
 
         //Vector2 inputVector = i.actions["Movement"].ReadValue<Vector2>();
@@ -74,5 +98,10 @@ public class PlayerAnimations : MonoBehaviour
 
         //a.SetFloat("MoveX", smoothMoveX);
         //a.SetFloat("MoveY", smoothMoveY);
+    }
+
+    private void AimMovement()
+    {
+
     }
 }

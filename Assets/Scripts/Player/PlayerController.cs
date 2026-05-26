@@ -28,6 +28,9 @@ public class PlayerController : MonoBehaviour
     public event System.Action OnDive;
     public event System.Action OnClimb;
 
+    private Transform mesh;
+    public bool isAiming { get; private set; }
+
     void Start()
     {
 
@@ -36,10 +39,10 @@ public class PlayerController : MonoBehaviour
 
     public void Initialize()
     {
-
         controller = GetComponent<CharacterController>();
         input = GetComponent<PlayerInput>();
         diving = GetComponent<PlayerDiving>();
+        mesh = GetComponentInChildren<Animator>().transform;
 
         elapsedDiveTime = 0f;
         elapsedTime = 0f;
@@ -49,6 +52,8 @@ public class PlayerController : MonoBehaviour
         input.actions["Crouch"].performed += ctx => HandleCrouchInput();
         input.actions["Prone"].performed += ctx => HandleProneInput();
         input.actions["Climb/Dive"].performed += ctx => HandleClimbDiveInput(ctx);
+        input.actions["SecondaryAction"].performed += ctx => isAiming = true;
+        input.actions["SecondaryAction"].canceled += ctx => isAiming = false;
     }
 
     void Update()
@@ -169,6 +174,9 @@ public class PlayerController : MonoBehaviour
         {
             elapsedDiveTime += Time.deltaTime;
             controller.height = Mathf.Lerp(controller.height, targetHeight, (elapsedDiveTime / speed));
+
+            var targetOffset = new Vector3(mesh.localPosition.x, (controller.height / 2f), mesh.localPosition.z);
+            mesh.localPosition = Vector3.Lerp(mesh.localPosition, targetOffset, (elapsedDiveTime / speed));
             yield return null;
         }
 
