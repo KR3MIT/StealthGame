@@ -402,6 +402,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2081063893}
     m_Modifications:
+    - target: {fileID: 2201990707374685416, guid: 86dc3ec0aa7e52a41baa2a00256ececb, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 7bbd7652f1fe86a409ade631b6d6fc75, type: 2}
     - target: {fileID: 5067743846032021495, guid: 86dc3ec0aa7e52a41baa2a00256ececb, type: 3}
       propertyPath: m_Name
       value: SKM_Player
@@ -642,6 +646,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   state: 0
+  standingVisibility: 25
+  crouchingVisibility: 10
+  proneVisibility: 5
 --- !u!114 &329947998
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2892,6 +2899,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   gameState: 0
   alertness: 0
+  passiveVisibility: 1
+  alertVisibility: 10
+  aggressiveVisibility: 20
 --- !u!4 &1820415130
 Transform:
   m_ObjectHideFlags: 0
@@ -3164,6 +3174,96 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1981654949}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &2051767662
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2051767663}
+  - component: {fileID: 2051767665}
+  - component: {fileID: 2051767664}
+  m_Layer: 0
+  m_Name: Gizmo
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2051767663
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051767662}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0.00000008940697}
+  m_LocalPosition: {x: 0, y: 1.3999997, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 2081063893}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+--- !u!23 &2051767664
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051767662}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 4624419afe03ac74797d7fd09ebc3961, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &2051767665
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2051767662}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &2081063891
 GameObject:
   m_ObjectHideFlags: 0
@@ -3197,6 +3297,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 284509197}
+  - {fileID: 2051767663}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!195 &2081063894
@@ -3233,10 +3334,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraphAgent
-  m_Graph: {fileID: -8100425194261869983, guid: 90fa93d428fb325498e74e77cd2dd593, type: 2}
+  m_Graph: {fileID: 3451411559434242467, guid: 90fa93d428fb325498e74e77cd2dd593, type: 2}
   m_BlackboardVariableOverridesList:
   - rid: 1939643585009811730
-  m_OriginalGraph: {fileID: 0}
+  - rid: 1939643596182651121
+  m_OriginalGraph: {fileID: 3451411559434242467, guid: 90fa93d428fb325498e74e77cd2dd593, type: 2}
   m_IsInitialised: 0
   m_IsStarted: 0
   references:
@@ -3250,6 +3352,14 @@ MonoBehaviour:
           m_Value1: 0
         Name: Self
         m_Value: {fileID: 2081063891}
+    - rid: 1939643596182651121
+      type: {class: 'BlackboardVariable`1[[EnemyVision, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 17516487117938231889
+          m_Value1: 1271555271062837726
+        Name: Enemy Vision
+        m_Value: {fileID: 2081063896}
 --- !u!114 &2081063896
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3263,9 +3373,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyVision
   range: 10
-  FOV: 120
+  fov: 120
   checkFrequency: 0.2
-  TargetMask:
+  targetMask:
     serializedVersion: 2
     m_Bits: 64
   obstMask:
@@ -3273,6 +3383,8 @@ MonoBehaviour:
     m_Bits: 9
   inSight: 0
   alertnessRate: 1
+  alertnessLossDelay: 2
+  alertnessLossRate: 25
 --- !u!1 &2091090650
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
 
     public State state;
 
+    public float standingVisibility, crouchingVisibility, proneVisibility;
+
     private CharacterController controller;
     private PlayerInput input;
     private PlayerDiving diving;
@@ -32,6 +34,7 @@ public class PlayerController : MonoBehaviour
 
     private Transform mesh;
     public bool isAiming { get; private set; }
+    public float visibility { get; private set; }
 
     private void Awake()
     {
@@ -45,7 +48,6 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-
         Initialize();
     }
 
@@ -157,22 +159,27 @@ public class PlayerController : MonoBehaviour
         switch (newState)
         {
             case State.Standing:
-                StartCoroutine(SetHeight(2.0f,0.5f)); 
+                StartCoroutine(SetHeight(2.0f,0.5f));
+                visibility = standingVisibility;
                 break;
 
             case State.Crouching:
                 StartCoroutine(SetHeight(1.0f,0.5f)); 
+                visibility = crouchingVisibility;
                 break;
 
             case State.Prone:
                 StartCoroutine(SetHeight(0.5f,0.5f)); 
+                visibility = proneVisibility;
                 break;
 
             case State.Climbing: 
+                visibility = crouchingVisibility;
                 break;
 
             case State.Carrying: 
                 StartCoroutine(SetHeight(2.0f,0.5f));
+                visibility = standingVisibility;
                 break;
         }
         this.state = newState;

@@ -19,6 +19,9 @@ public class GameManager : MonoBehaviour
     }
     public Alertness alertness;
 
+    public float passiveVisibility, alertVisibility, aggressiveVisibility;
+    public float alertnessVisibility { get; private set; }
+
     private void Awake()
     {
         if (instance == null)
@@ -35,9 +38,9 @@ public class GameManager : MonoBehaviour
         SetAlertness(Alertness.Passive);
     }
 
-    public void SetState(GameState state)
+    public void SetState(GameState _state)
     {
-        switch (state)
+        switch (_state)
         {
             case GameState.MainMenu:
                 Cursor.lockState = CursorLockMode.None;
@@ -48,8 +51,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetAlertness(Alertness alertness)
+    public void SetAlertness(Alertness _alertness)
     {
-        this.alertness = alertness;
+        this.alertness = _alertness;
+        SetAlertnessVisibility(_alertness);
+    }
+
+    public void SetAlertnessVisibility(Alertness _alertness)
+    {
+        switch (_alertness)
+        {
+            case Alertness.Passive:
+                alertnessVisibility = passiveVisibility;
+                break;
+            case Alertness.Alert:
+                alertnessVisibility = alertVisibility;
+                break;
+            case Alertness.Aggressive:
+                alertnessVisibility = aggressiveVisibility;
+                break;
+            default:
+                alertnessVisibility = 1f;
+                break;
+        }
     }
 }

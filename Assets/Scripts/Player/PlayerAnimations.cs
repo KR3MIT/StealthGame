@@ -13,7 +13,7 @@ public class PlayerAnimations : MonoBehaviour
     private PlayerInput input;
     private Transform cameraOffset;
 
-    private float rotationSpeed = 720f;
+    private float rotationSpeed = 360f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()

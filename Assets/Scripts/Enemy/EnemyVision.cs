@@ -4,21 +4,25 @@ using UnityEngine;
 public class EnemyVision : MonoBehaviour
 {
     public float range = 10f;
-    public float FOV = 120f;
+    public float fov = 120f;
     public float checkFrequency = 0.2f;
 
-    public LayerMask TargetMask;
+    public LayerMask targetMask;
     public LayerMask obstMask;
 
     public bool inSight;
 
     public float alertness { get; private set; }
     public float alertnessRate = 1f;
+    public float alertnessLossDelay = 1f;
+    public float alertnessLossRate = 10f;
+
 
     private float maxAlertness = 100f;
     private float alertnessModifier;
+    private float sightLostTimer = 0f;
 
-    private GameObject player;
+    private Material gizmoMat;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -27,9 +31,15 @@ public class EnemyVision : MonoBehaviour
 
         StartCoroutine(CheckRoutine());
     }
+
+    void Update()
+    {
+        HandleAlertness();
+    }
+
     private void Initialize()
     {
-        player = PlayerController.instance.gameObject;
+        gizmoMat = transform.GetChild(1).GetComponent<MeshRenderer>().material;
     }
 
     private IEnumerator CheckRoutine()
@@ -45,14 +55,14 @@ public class EnemyVision : MonoBehaviour
 
     private void FOVCheck()
     {
-        Collider[] rangeCheck = Physics.OverlapSphere(transform.position, range, TargetMask);
+        Collider[] rangeCheck = Physics.OverlapSphere(transform.position, range, targetMask);
 
         if (rangeCheck.Length != 0)
         {
             Transform target = rangeCheck[0].transform;
             Vector3 dirToTarget = (target.position - transform.position).normalized;
 
-            if (Vector3.Angle(transform.forward, dirToTarget) < FOV / 2)
+            if (Vector3.Angle(transform.forward, dirToTarget) < fov / 2)
             {
                 float distToTarget = Vector3.Distance(transform.position, target.position);
 
@@ -66,5 +76,25 @@ public class EnemyVision : MonoBehaviour
         }
         else if (inSight)
             inSight = false;
+    }
+
+    private void HandleAlertness()
+    {
+        alertnessModifier = PlayerController.instance.visibility + GameManager.instance.alertnessVisibility;
+
+        if (inSight)
+        {
+            sightLostTimer = 0f;
+            alertness += alertnessRate * alertnessModifier * Time.deltaTime;
+        }
+        else
+        {
+            sightLostTimer += Time.deltaTime;
+            if (sightLostTimer >= alertnessLossDelay)
+                alertness -= alertnessRate * alertnessLossRate * Time.deltaTime;
+        }
+
+        alertness = Mathf.Clamp(alertness, 0, maxAlertness);
+        gizmoMat.SetFloat("_Procentage", alertness / maxAlertness);
     }
 }
