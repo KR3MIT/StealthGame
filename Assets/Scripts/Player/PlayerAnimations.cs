@@ -11,6 +11,7 @@ public class PlayerAnimations : MonoBehaviour
     private PlayerClimbing climbing;
     private PlayerDiving diving;
     private PlayerInput input;
+    private Transform cameraOffset;
 
     private float rotationSpeed = 720f;
 
@@ -27,8 +28,6 @@ public class PlayerAnimations : MonoBehaviour
             AimMovement();
         else
             Movement();
-
-        SetStance();
     }
 
     private void Initialize()
@@ -41,6 +40,7 @@ public class PlayerAnimations : MonoBehaviour
         playerController = GetComponent<PlayerController>();
         diving = GetComponent<PlayerDiving>();
         input = GetComponent<PlayerInput>();
+        cameraOffset = transform.GetChild(0);
 
         Inputs();
     }
@@ -53,6 +53,7 @@ public class PlayerAnimations : MonoBehaviour
 
         input.actions["SecondaryAction"].performed += ctx => SetAim();
         input.actions["SecondaryAction"].canceled += ctx => SetAim();
+        playerController.OnStateChange += () => SetStance();
     }
 
     private void SetStance()
@@ -102,6 +103,11 @@ public class PlayerAnimations : MonoBehaviour
 
     private void AimMovement()
     {
+        Vector3 forward = cameraOffset.forward;
+        forward.y = 0;
+        forward = forward.normalized;
 
+        Quaternion targetRotation = Quaternion.LookRotation(forward);
+        mesh.rotation = Quaternion.RotateTowards(mesh.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine.InputSystem.Interactions;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instance;
     public enum State
     {
         Standing,
@@ -27,9 +28,20 @@ public class PlayerController : MonoBehaviour
 
     public event System.Action OnDive;
     public event System.Action OnClimb;
+    public event System.Action OnStateChange;
 
     private Transform mesh;
     public bool isAiming { get; private set; }
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
+
+        DontDestroyOnLoad(this);
+    }
 
     void Start()
     {
@@ -164,6 +176,7 @@ public class PlayerController : MonoBehaviour
                 break;
         }
         this.state = newState;
+        OnStateChange.Invoke();
     }
 
     private IEnumerator SetHeight(float targetHeight, float speed)
@@ -175,7 +188,7 @@ public class PlayerController : MonoBehaviour
             elapsedDiveTime += Time.deltaTime;
             controller.height = Mathf.Lerp(controller.height, targetHeight, (elapsedDiveTime / speed));
 
-            var targetOffset = new Vector3(mesh.localPosition.x, (controller.height / 2f), mesh.localPosition.z);
+            var targetOffset = new Vector3(0f, -(controller.height / 2f), 0f);
             mesh.localPosition = Vector3.Lerp(mesh.localPosition, targetOffset, (elapsedDiveTime / speed));
             yield return null;
         }

@@ -2,34 +2,37 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    private static GameManager _instance;
-    public static GameManager Instance;
+    public static GameManager instance;
+    
     public enum GameState
     {
         MainMenu,
         Playing
     }
-
-    [HideInInspector]
     public GameState gameState;
+    
+    public enum Alertness
+    {
+        Passive,
+        Alert,
+        Aggressive
+    }
+    public Alertness alertness;
 
     private void Awake()
     {
-        if (_instance != null && _instance != this)
-        {
-            Destroy(gameObject);
-        }
+        if (instance == null)
+            instance = this;
         else
-        {
-            _instance = this;
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
+            Destroy(gameObject);
+
+        DontDestroyOnLoad(this);
     }
 
     void Start()
     {
         SetState(GameState.Playing);
+        SetAlertness(Alertness.Passive);
     }
 
     public void SetState(GameState state)
@@ -43,5 +46,10 @@ public class GameManager : MonoBehaviour
                 Cursor.lockState = CursorLockMode.Locked;
                 break;
         }
+    }
+
+    public void SetAlertness(Alertness alertness)
+    {
+        this.alertness = alertness;
     }
 }
