@@ -107,6 +107,9 @@ public class PlayerAnimations : MonoBehaviour
         forward.y = 0;
         forward = forward.normalized;
 
+        if(forward.magnitude < 0.001f)
+            return;
+        
         Quaternion targetRotation = Quaternion.LookRotation(forward);
         mesh.rotation = Quaternion.RotateTowards(mesh.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }

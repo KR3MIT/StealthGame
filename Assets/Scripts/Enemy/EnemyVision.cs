@@ -9,8 +9,8 @@ public class EnemyVision : MonoBehaviour
 
     public LayerMask targetMask;
     public LayerMask obstMask;
-
-    public bool inSight;
+    
+    public bool inSight { get; private set; }
 
     public float alertness { get; private set; }
     public float alertnessRate = 1f;
