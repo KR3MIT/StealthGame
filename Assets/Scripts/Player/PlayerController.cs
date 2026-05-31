@@ -5,6 +5,7 @@ using UnityEngine.InputSystem.Interactions;
 
 public class PlayerController : MonoBehaviour
 {
+    // made with the help of claude.ai
     public static PlayerController instance;
     public enum State
     {
@@ -18,6 +19,8 @@ public class PlayerController : MonoBehaviour
     public State state;
 
     public float standingVisibility, crouchingVisibility, proneVisibility;
+
+    [HideInInspector] public float envModifier = 0f;
 
     private CharacterController controller;
     private PlayerInput input;
@@ -160,26 +163,26 @@ public class PlayerController : MonoBehaviour
         {
             case State.Standing:
                 StartCoroutine(SetHeight(2.0f,0.5f));
-                visibility = standingVisibility;
+                visibility = standingVisibility + envModifier;
                 break;
 
             case State.Crouching:
                 StartCoroutine(SetHeight(1.0f,0.5f)); 
-                visibility = crouchingVisibility;
+                visibility = crouchingVisibility + envModifier;
                 break;
 
             case State.Prone:
                 StartCoroutine(SetHeight(0.5f,0.5f)); 
-                visibility = proneVisibility;
+                visibility = proneVisibility + envModifier;
                 break;
 
             case State.Climbing: 
-                visibility = crouchingVisibility;
+                visibility = crouchingVisibility + envModifier;
                 break;
 
             case State.Carrying: 
                 StartCoroutine(SetHeight(2.0f,0.5f));
-                visibility = standingVisibility;
+                visibility = standingVisibility + envModifier;
                 break;
         }
         this.state = newState;

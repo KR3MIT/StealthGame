@@ -1,5 +1,7 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyVision : MonoBehaviour
 {
@@ -9,37 +11,14 @@ public class EnemyVision : MonoBehaviour
 
     public LayerMask targetMask;
     public LayerMask obstMask;
-    
-    public bool inSight { get; private set; }
 
-    public float alertness { get; private set; }
-    public float alertnessRate = 1f;
-    public float alertnessLossDelay = 1f;
-    public float alertnessLossRate = 10f;
-
-
-    private float maxAlertness = 100f;
-    private float alertnessModifier;
-    private float sightLostTimer = 0f;
-
-    private Material gizmoMat;
+    public bool inSight;
+    public float distToTarget;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Initialize();
-
         StartCoroutine(CheckRoutine());
-    }
-
-    void Update()
-    {
-        HandleAlertness();
-    }
-
-    private void Initialize()
-    {
-        gizmoMat = transform.GetChild(1).GetComponent<MeshRenderer>().material;
     }
 
     private IEnumerator CheckRoutine()
@@ -64,10 +43,13 @@ public class EnemyVision : MonoBehaviour
 
             if (Vector3.Angle(transform.forward, dirToTarget) < fov / 2)
             {
-                float distToTarget = Vector3.Distance(transform.position, target.position);
+                float _distToTarget = Vector3.Distance(transform.position, target.position);
 
-                if (!Physics.Raycast(transform.position, dirToTarget, distToTarget, obstMask))
+                if (!Physics.Raycast(transform.position, dirToTarget, _distToTarget, obstMask))
+                {
                     inSight = true;
+                    distToTarget = _distToTarget;
+                }
                 else
                     inSight = false;
             }
@@ -76,25 +58,5 @@ public class EnemyVision : MonoBehaviour
         }
         else if (inSight)
             inSight = false;
-    }
-
-    private void HandleAlertness()
-    {
-        alertnessModifier = PlayerController.instance.visibility + GameManager.instance.alertnessVisibility;
-
-        if (inSight)
-        {
-            sightLostTimer = 0f;
-            alertness += alertnessRate * alertnessModifier * Time.deltaTime;
-        }
-        else
-        {
-            sightLostTimer += Time.deltaTime;
-            if (sightLostTimer >= alertnessLossDelay)
-                alertness -= alertnessRate * alertnessLossRate * Time.deltaTime;
-        }
-
-        alertness = Mathf.Clamp(alertness, 0, maxAlertness);
-        gizmoMat.SetFloat("_Procentage", alertness / maxAlertness);
     }
 }

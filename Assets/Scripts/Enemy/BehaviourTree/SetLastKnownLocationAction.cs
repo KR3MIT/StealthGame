@@ -5,17 +5,15 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "Set last known location", story: "Set [LastKnownLocation]", category: "Action", id: "13ab14b123b7a54910877477f0300367")]
+[NodeDescription(name: "Set LastKnownLocation", story: "Set [Player] [LastKnownLocation]", category: "Action", id: "a0be08ae18a216bbda6babbbc0c1d966")]
 public partial class SetLastKnownLocationAction : Action
 {
+    [SerializeReference] public BlackboardVariable<GameObject> Player;
     [SerializeReference] public BlackboardVariable<Vector3> LastKnownLocation;
-    [SerializeReference] public BlackboardVariable<EnemyVision> Vision;
 
     protected override Status OnStart()
     {
-        if(Vision.Value.inSight)
-            LastKnownLocation.Value = PlayerController.instance.transform.position;
-
+        LastKnownLocation.Value = Player.Value.transform.position;
         return Status.Success;
     }
 }

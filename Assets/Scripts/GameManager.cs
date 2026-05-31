@@ -53,11 +53,11 @@ public class GameManager : MonoBehaviour
 
     public void SetAlertness(Alertness _alertness)
     {
-        this.alertness = _alertness;
-        SetAlertnessVisibility(_alertness);
+        alertness = _alertness;
+        SetAlertnessVisibility(alertness);
     }
 
-    public void SetAlertnessVisibility(Alertness _alertness)
+    private void SetAlertnessVisibility(Alertness _alertness)
     {
         switch (_alertness)
         {
