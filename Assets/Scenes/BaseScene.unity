@@ -4261,8 +4261,6 @@ MonoBehaviour:
   obstMask:
     serializedVersion: 2
     m_Bits: 9
-  inSight: 0
-  distToTarget: 0
 --- !u!114 &2081063897
 MonoBehaviour:
   m_ObjectHideFlags: 0
