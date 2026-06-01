@@ -12,8 +12,8 @@ public class EnemyVision : MonoBehaviour
     public LayerMask targetMask;
     public LayerMask obstMask;
 
-    public bool inSight;
-    public float distToTarget;
+    public bool inSight {  get; private set; }
+    public float distToTarget {  get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -48,15 +48,24 @@ public class EnemyVision : MonoBehaviour
                 if (!Physics.Raycast(transform.position, dirToTarget, _distToTarget, obstMask))
                 {
                     inSight = true;
-                    distToTarget = _distToTarget;
+                    distToTarget = _distToTarget; // only set when actually visible
                 }
                 else
+                {
                     inSight = false;
+                    distToTarget = 0f;
+                }
             }
             else
+            {
                 inSight = false;
+                distToTarget = 0f;
+            }
         }
-        else if (inSight)
+        else
+        {
             inSight = false;
+            distToTarget = 0f;
+        }
     }
 }

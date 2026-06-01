@@ -948,9 +948,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   state: 0
-  standingVisibility: 0.25
-  crouchingVisibility: 0.1
-  proneVisibility: 0.05
+  standingVisibility: 0.5
+  crouchingVisibility: 0.25
+  proneVisibility: 0.1
   envModifier: 0
 --- !u!114 &329947998
 MonoBehaviour:
@@ -4134,8 +4134,9 @@ GameObject:
   - component: {fileID: 2081063893}
   - component: {fileID: 2081063896}
   - component: {fileID: 2081063897}
-  - component: {fileID: 2081063895}
+  - component: {fileID: 2081063899}
   - component: {fileID: 2081063898}
+  - component: {fileID: 2081063895}
   - component: {fileID: 2081063894}
   m_Layer: 7
   m_Name: Enemy
@@ -4152,7 +4153,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2081063891}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0.70710677, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: -0, y: -0.70710695, z: -0, w: 0.7071067}
   m_LocalPosition: {x: 25, y: 1.1, z: -6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4197,17 +4198,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Behavior::Unity.Behavior.BehaviorGraphAgent
   m_Graph: {fileID: 5081701792363827343, guid: 90fa93d428fb325498e74e77cd2dd593, type: 2}
   m_BlackboardVariableOverridesList:
-  - rid: 1330871579615953624
-  - rid: 1330871579615953643
-  - rid: 1330871579615953644
-  - rid: 1330871581647831250
+  - rid: 1330871589027709650
+  - rid: 1330871589027709651
+  - rid: 1330871589027709652
+  - rid: 1330871589027709653
   m_OriginalGraph: {fileID: 5081701792363827343, guid: 90fa93d428fb325498e74e77cd2dd593, type: 2}
   m_IsInitialised: 0
   m_IsStarted: 0
   references:
     version: 2
     RefIds:
-    - rid: 1330871579615953624
+    - rid: 1330871589027709650
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -4215,23 +4216,7 @@ MonoBehaviour:
           m_Value1: 0
         Name: Self
         m_Value: {fileID: 2081063891}
-    - rid: 1330871579615953643
-      type: {class: 'BlackboardVariable`1[[EnemyVision, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 10917076028481548784
-          m_Value1: 9356983471545271921
-        Name: Vision
-        m_Value: {fileID: 2081063896}
-    - rid: 1330871579615953644
-      type: {class: 'BlackboardVariable`1[[EnemyAlertness, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 741790321195550801
-          m_Value1: 1312873181271253526
-        Name: Alertness
-        m_Value: {fileID: 2081063897}
-    - rid: 1330871581647831250
+    - rid: 1330871589027709651
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -4239,6 +4224,22 @@ MonoBehaviour:
           m_Value1: 15293564076767287495
         Name: Player
         m_Value: {fileID: 329947985}
+    - rid: 1330871589027709652
+      type: {class: 'BlackboardVariable`1[[EnemyVision, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10917076028481548784
+          m_Value1: 9356983471545271921
+        Name: Vision
+        m_Value: {fileID: 2081063896}
+    - rid: 1330871589027709653
+      type: {class: 'BlackboardVariable`1[[EnemyAlertness, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 741790321195550801
+          m_Value1: 1312873181271253526
+        Name: Alertness
+        m_Value: {fileID: 2081063897}
 --- !u!114 &2081063896
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4289,6 +4290,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b49663867263fbb4ba35e1a9ec5a3ead, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAnimations
+--- !u!114 &2081063899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081063891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2ef889e12d74774e9d4ae91109e127c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
 --- !u!1 &2091090650
 GameObject:
   m_ObjectHideFlags: 0

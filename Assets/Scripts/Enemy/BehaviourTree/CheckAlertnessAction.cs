@@ -23,8 +23,5 @@ public partial class CheckAlertnessAction : Action
         else
             return Status.Failure;
     }
-    protected override void OnEnd()
-    {
-    }
 }
 

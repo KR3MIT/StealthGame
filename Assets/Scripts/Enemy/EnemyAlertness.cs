@@ -1,9 +1,7 @@
-using Unity.VisualScripting;
 using UnityEngine;
-
 public class EnemyAlertness : MonoBehaviour
 {
-    public float alertness { get; private set; }
+    public float alertness {  get; private set; }
     public float alertnessRate = 0.01f;
     public float alertnessLossDelay = 1f;
     public float alertnessLossRate = 0.5f;
@@ -39,17 +37,19 @@ public class EnemyAlertness : MonoBehaviour
         {
             sightLostTimer = 0f;
 
-            float distanceFactor = Mathf.Pow(1f - Mathf.Clamp01(vision.distToTarget / vision.range), falloff);
-
-            alertness += (alertnessRate + alertnessModifier) * distanceFactor * Time.deltaTime;
+            if (alertness < maxAlertness) // only gain if not already maxed
+            {
+                float distanceFactor = Mathf.Pow(1f - Mathf.Clamp01(vision.distToTarget / vision.range), falloff);
+                alertness += (alertnessRate + alertnessModifier) * distanceFactor * Time.deltaTime;
+            }
         }
         else
         {
             sightLostTimer += Time.deltaTime;
             if (sightLostTimer >= alertnessLossDelay)
-                alertness -= (alertnessRate + alertnessLossRate) * Time.deltaTime;
+                alertness -= alertnessLossRate * Time.deltaTime; // removed alertnessRate from loss
         }
 
-        alertness = Mathf.Clamp(alertness, 0, maxAlertness);
+        alertness = Mathf.Clamp(alertness, 0f, maxAlertness);
     }
 }

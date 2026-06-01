@@ -12,9 +12,12 @@ public partial class InvestigateAction : Action
     // made with the help of claude.ai
     [SerializeReference] public BlackboardVariable<Vector3> LastKnownLoc;
     [SerializeReference] public BlackboardVariable<GameObject> Player;
+    [SerializeReference] public BlackboardVariable<float> _pauseDuration;
+    [SerializeReference] public BlackboardVariable<float> _rotationSpeed;
+    [SerializeReference] public BlackboardVariable<float> _threshold;
 
-    private float _rotationSpeed = 90f;
-    private float _pauseDuration = 1f;
+    //private float _rotationSpeed = 90f;
+    //private float _pauseDuration = 3f;
     private bool _isComplete;
     private MonoBehaviour _owner;
 
@@ -32,10 +35,13 @@ public partial class InvestigateAction : Action
     }
     protected override Status OnUpdate()
     {
-        if (_vision.inSight && _alertness.alertness >= 0.8f)
+        if (_vision.inSight && _alertness.alertness >= _threshold)
+        {
+            _owner.StopAllCoroutines();
             return Status.Success;
+        }
 
-        return _isComplete ? Status.Success : Status.Running;
+        return _isComplete ? Status.Failure : Status.Running;
     }
     protected override void OnEnd()
     {
@@ -45,6 +51,7 @@ public partial class InvestigateAction : Action
     private IEnumerator InvestigateRoutine(Transform transform, Vector3 investigatePosition)
     {
         yield return RotateTowards(transform, investigatePosition);
+        yield return new WaitForSeconds(_pauseDuration);
 
         float firstAngle = UnityEngine.Random.Range(110f, 130f) * (UnityEngine.Random.value > 0.5f ? 1f : -1f);
         yield return RotateByAngle(transform, firstAngle);
