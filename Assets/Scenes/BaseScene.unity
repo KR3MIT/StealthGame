@@ -3849,7 +3849,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5253fef49024009479b08ab044d94841, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  countDown: 10
+  countDown: 20
   gameState: 0
   alertness: 0
   passiveVisibility: 0
