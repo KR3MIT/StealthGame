@@ -1,7 +1,7 @@
 using UnityEngine;
 public class EnemyAlertness : MonoBehaviour
 {
-    public float alertness {  get; private set; }
+    public float alertness;
     public float alertnessRate = 0.01f;
     public float alertnessLossDelay = 1f;
     public float alertnessLossRate = 0.5f;

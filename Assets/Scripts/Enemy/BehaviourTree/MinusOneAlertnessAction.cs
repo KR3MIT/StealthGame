@@ -5,11 +5,12 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "CheckAlertness", story: "If Alert > [AlertThreshold]", category: "Action", id: "f5b30e3561d1ced7c4c69fbe270bcabb")]
-public partial class CheckAlertnessAction : Action
+[NodeDescription(name: "MinusOneAlertness", story: "if Alertness < [Threshold]", category: "Action", id: "bafeb6dfb228d58f05190385f55778da")]
+public partial class MinusOneAlertnessAction : Action
 {
-    [SerializeReference] public BlackboardVariable<float> AlertThreshold;
+    [SerializeReference] public BlackboardVariable<float> Threshold;
     private EnemyAlertness alert;
+
     protected override Status OnStart()
     {
         alert = GameObject.GetComponent<EnemyAlertness>();
@@ -18,7 +19,7 @@ public partial class CheckAlertnessAction : Action
 
     protected override Status OnUpdate()
     {
-        if (alert.alertness >= AlertThreshold.Value)
+        if (alert.alertness <= Threshold.Value)
             return Status.Success;
         else
             return Status.Failure;

@@ -16,11 +16,11 @@ public partial class ShootAtPlayerAction : Action
 
     protected override Status OnUpdate()
     {
+        //var controller = Player.Value.GetComponent<PlayerController>();
+        //if (controller.state == PlayerController.State.Dead)
+        //    return Status.Success;
+        //else 
+        //    return Status.Running;
         return Status.Success;
     }
-
-    protected override void OnEnd()
-    {
-    }
 }
-

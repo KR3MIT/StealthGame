@@ -13,7 +13,8 @@ public class PlayerController : MonoBehaviour
         Crouching,
         Prone,
         Climbing,
-        Carrying
+        Carrying,
+        Dead
     }
 
     public State state;
@@ -183,6 +184,9 @@ public class PlayerController : MonoBehaviour
             case State.Carrying: 
                 StartCoroutine(SetHeight(2.0f,0.5f));
                 visibility = standingVisibility + envModifier;
+                break;
+            case State.Dead:
+                
                 break;
         }
         this.state = newState;

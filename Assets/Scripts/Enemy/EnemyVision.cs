@@ -12,7 +12,7 @@ public class EnemyVision : MonoBehaviour
     public LayerMask targetMask;
     public LayerMask obstMask;
 
-    public bool inSight {  get; private set; }
+    public bool inSight;
     public float distToTarget {  get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -51,21 +51,12 @@ public class EnemyVision : MonoBehaviour
                     distToTarget = _distToTarget; // only set when actually visible
                 }
                 else
-                {
                     inSight = false;
-                    distToTarget = 0f;
-                }
             }
             else
-            {
                 inSight = false;
-                distToTarget = 0f;
-            }
         }
         else
-        {
             inSight = false;
-            distToTarget = 0f;
-        }
     }
 }

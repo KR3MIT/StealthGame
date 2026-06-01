@@ -1,9 +1,16 @@
+using System.Collections;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    
+
+    public event System.Action OnCountDownEnded;
+
+    [SerializeField] private float countDown;
+    public float currentCountDown { get; private set; }
+
+    private Coroutine _routine;
     public enum GameState
     {
         MainMenu,
@@ -74,5 +81,28 @@ public class GameManager : MonoBehaviour
                 alertnessVisibility = 1f;
                 break;
         }
+    }
+
+    public void StartCountdown()
+    {
+        if (_routine != null)
+            StopCoroutine(_routine);
+
+        _routine = StartCoroutine(Countdown());
+    }
+
+    private IEnumerator Countdown()
+    {
+        currentCountDown = countDown;
+
+        while (currentCountDown > 0f)
+        {
+            currentCountDown -= Time.deltaTime;
+            yield return null;
+        }
+
+        currentCountDown = 0f;
+        _routine = null;
+        OnCountDownEnded?.Invoke();
     }
 }
