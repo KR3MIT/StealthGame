@@ -12,7 +12,7 @@ public class EnemyVision : MonoBehaviour
     public LayerMask targetMask;
     public LayerMask obstMask;
 
-    public bool inSight;
+    public bool inSight { get; private set; }
     public float distToTarget {  get; private set; }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

@@ -1,14 +1,20 @@
 using TMPro;
+using Unity.Behavior;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class EnemyAnimations : MonoBehaviour
 {
-    private EnemyAlertness alertness;
+    //made with the help of claude.ai
 
     private Canvas canvas;
     private Material gizmoMat;
     private TMP_Text alertnessText;
+
+    private BehaviorGraphAgent _agent;
+    private Animator animator;
+    private EnemyAlertness alert;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -17,10 +23,14 @@ public class EnemyAnimations : MonoBehaviour
 
     private void Initialize()
     {
-        alertness = GetComponent<EnemyAlertness>();
+        alert = GetComponent<EnemyAlertness>();
+        _agent = GetComponent<BehaviorGraphAgent>();
+        animator = transform.GetChild(0).GetComponent<Animator>();
 
         canvas = transform.GetChild(1).GetComponent<Canvas>();
-        gizmoMat = canvas.transform.GetChild(0).GetComponent<Image>().material;
+        Image gizmoImage = canvas.transform.GetChild(0).GetComponent<Image>();
+        gizmoMat = new Material(gizmoImage.material); // unique copy
+        gizmoImage.material = gizmoMat;               // assign back
         alertnessText = canvas.transform.GetChild(1).GetComponent<TMP_Text>();
     }
 
@@ -28,17 +38,30 @@ public class EnemyAnimations : MonoBehaviour
     void Update()
     {
         Vector3 player = PlayerController.instance.transform.position;
-        Vector3 target = new Vector3(player.x, transform.position.y, player.z);
 
-        canvas.transform.LookAt(target);
-        gizmoMat.SetFloat("_Procentage", alertness.alertness);
+        canvas.transform.LookAt(player);
+        gizmoMat.SetFloat("_Procentage", alert.alertness);
 
-        if (alertness.alertness > 0.001f)
+        if (alert.alertness > 0.001f)
         {
-            alertnessText.text = alertness.alertness.ToString("F2") + "%";
+            alertnessText.text = alert.alertness.ToString("F2") + "%";
             alertnessText.gameObject.SetActive(true);
         }
         else
             alertnessText.gameObject.SetActive(false);
+
+        AlertStateSync();
+    }
+
+    private void AlertStateSync()
+    {
+        _agent.BlackboardReference.GetVariableValue("AlertState", out AlertState state);
+        
+        animator.SetBool("isPassive", state == AlertState.Passive);
+        animator.SetBool("isAlert", state == AlertState.Alert);
+        animator.SetBool("isGoTo", state == AlertState.GoTo);
+        animator.SetBool("isAggressive", state == AlertState.Aggressive);
+
+        animator.SetFloat("Alertness", alert.alertness);
     }
 }

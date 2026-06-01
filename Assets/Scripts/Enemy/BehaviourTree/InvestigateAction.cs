@@ -14,6 +14,7 @@ public partial class InvestigateAction : Action
     [SerializeReference] public BlackboardVariable<float> PauseDuration;
     [SerializeReference] public BlackboardVariable<float> RotationSpeed;
     [SerializeReference] public BlackboardVariable<float> Threshold;
+    [SerializeReference] public BlackboardVariable<float> stoppingDistance;
 
     private bool _isComplete;
     private bool _isNavigating;
@@ -51,7 +52,7 @@ public partial class InvestigateAction : Action
         // still navigating to last known location
         if (_isNavigating)
         {
-            if (!_agent.pathPending && _agent.remainingDistance <= _agent.stoppingDistance)
+            if (!_agent.pathPending && _agent.remainingDistance <= stoppingDistance.Value)
             {
                 _isNavigating = false;
                 _agent.isStopped = true;
@@ -75,8 +76,12 @@ public partial class InvestigateAction : Action
         }
         if (_agent != null)
         {
-            _agent.isStopped = true;
-            _agent.ResetPath();
+            if (_agent.isOnNavMesh)
+            {
+                _agent.isStopped = true;
+                _agent.ResetPath();
+                _agent.velocity = Vector3.zero;
+            }
         }
     }
 

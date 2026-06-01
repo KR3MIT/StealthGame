@@ -1412,8 +1412,8 @@
     "m_CustomSlotLabel": "",
     "m_DismissedVersion": 0,
     "m_Precision": 0,
-    "overrideHLSLDeclaration": false,
-    "hlslDeclarationOverride": 0,
+    "overrideHLSLDeclaration": true,
+    "hlslDeclarationOverride": 2,
     "m_Hidden": false,
     "m_PerRendererData": false,
     "m_customAttributes": [],
@@ -1673,8 +1673,8 @@
     "m_ObjectId": "6cca5b9c2bfa4fedac63f40e852b845a",
     "m_Title": "Alpha input",
     "m_Position": {
-        "x": -1825.0,
-        "y": 412.0000305175781
+        "x": -1824.9998779296875,
+        "y": 412.0
     }
 }
 
@@ -1850,8 +1850,8 @@
     "m_ObjectId": "731cbcf294b44006a852bd0ff79acdf9",
     "m_Title": "Color",
     "m_Position": {
-        "x": -1124.999755859375,
-        "y": -79.00003051757813
+        "x": -1125.0,
+        "y": -78.99996948242188
     }
 }
 
@@ -2023,7 +2023,7 @@
     "m_ObjectId": "8b64abc69ca14accbc821d2a12f22df3",
     "m_Title": "Shape",
     "m_Position": {
-        "x": -1917.0,
+        "x": -1916.9998779296875,
         "y": 682.0
     }
 }

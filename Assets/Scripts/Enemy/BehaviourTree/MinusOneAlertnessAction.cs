@@ -8,6 +8,7 @@ using Unity.Properties;
 [NodeDescription(name: "MinusOneAlertness", story: "if Alertness < [Threshold]", category: "Action", id: "bafeb6dfb228d58f05190385f55778da")]
 public partial class MinusOneAlertnessAction : Action
 {
+    //made with the help of claude.ai
     [SerializeReference] public BlackboardVariable<float> Threshold;
     private EnemyAlertness alert;
 
@@ -25,4 +26,3 @@ public partial class MinusOneAlertnessAction : Action
             return Status.Failure;
     }
 }
-

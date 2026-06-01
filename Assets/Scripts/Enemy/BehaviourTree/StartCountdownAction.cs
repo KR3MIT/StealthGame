@@ -8,6 +8,7 @@ using Unity.Properties;
 [NodeDescription(name: "StartCountdown", story: "Start Countdown [CurrentAlertState]", category: "Action", id: "fe86c25b9736151e962b3888f7de7520")]
 public partial class StartCountdownAction : Action
 {
+    //made with the help of claude.ai
     [SerializeReference] public BlackboardVariable<AlertState> CurrentAlertState;
     private bool _countdownComplete;
     private EnemyVision _vision;

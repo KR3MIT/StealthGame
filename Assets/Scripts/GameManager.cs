@@ -3,11 +3,12 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    //made with the help of claude.ai
     public static GameManager instance;
 
     public event System.Action OnCountDownEnded;
 
-    [SerializeField] private float countDown;
+    public float countDownTime = 20f;
     public float currentCountDown { get; private set; }
 
     private Coroutine _routine;
@@ -93,7 +94,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator Countdown()
     {
-        currentCountDown = countDown;
+        currentCountDown = countDownTime;
 
         while (currentCountDown > 0f)
         {

@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.InputSystem;
 public class PlayerDiving : MonoBehaviour
 {
+    //made with the help of claude.ai
     public float diveVelocity = 25f;
     public float diveAirDrag = 3f;
     public float diveGroundDrag = 5f;
