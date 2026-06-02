@@ -1,6 +1,7 @@
 using TMPro;
 using Unity.Behavior;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class EnemyAnimations : MonoBehaviour
@@ -14,6 +15,7 @@ public class EnemyAnimations : MonoBehaviour
     private BehaviorGraphAgent _agent;
     private Animator animator;
     private EnemyAlertness alert;
+    private NavMeshAgent agent;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -26,6 +28,7 @@ public class EnemyAnimations : MonoBehaviour
         alert = GetComponent<EnemyAlertness>();
         _agent = GetComponent<BehaviorGraphAgent>();
         animator = transform.GetChild(0).GetComponent<Animator>();
+        agent = GetComponent<NavMeshAgent>();
 
         canvas = transform.GetChild(1).GetComponent<Canvas>();
         Image gizmoImage = canvas.transform.GetChild(0).GetComponent<Image>();
@@ -63,5 +66,7 @@ public class EnemyAnimations : MonoBehaviour
         animator.SetBool("isAggressive", state == AlertState.Aggressive);
 
         animator.SetFloat("Alertness", alert.alertness);
+
+        animator.SetFloat("Speed", agent.velocity.magnitude / agent.speed);
     }
 }
