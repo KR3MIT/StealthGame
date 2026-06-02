@@ -67,7 +67,10 @@ public class PlayerMovement : MonoBehaviour
         switch (playerController.state)
         {
             case PlayerController.State.Standing:
-                speed = isWalking? walkSpeed : moveSpeed;
+                if (isWalking || playerController.isAiming)
+                    speed = walkSpeed;
+                else 
+                    speed = moveSpeed;
                 break;
             case PlayerController.State.Crouching:
                 speed = walkSpeed; 

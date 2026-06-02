@@ -13,7 +13,7 @@ public class PlayerAnimations : MonoBehaviour
     private PlayerInput input;
     private Transform cameraOffset;
 
-    private float rotationSpeed = 360f;
+    private float rotationSpeed = 720f;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -24,7 +24,7 @@ public class PlayerAnimations : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(playerController.isAiming)
+        if(playerController.isAiming || (playerController.isAiming && playerController.state == PlayerController.State.Crouching))
             AimMovement();
         else
             Movement();
@@ -47,7 +47,7 @@ public class PlayerAnimations : MonoBehaviour
 
     private void Inputs()
     {
-        diving.OnDive += () => animator.SetTrigger("Dive");
+        //diving.OnDive += () => animator.SetTrigger("Dive");
         climbing.OnClimb += () => animator.SetTrigger("Climb");
         climbing.StopClimb += () => animator.SetTrigger("StopClimb");
 
@@ -67,7 +67,7 @@ public class PlayerAnimations : MonoBehaviour
 
     private void SetAim()
     {
-        animator.SetBool("isAiming", playerController.isAiming);
+        animator.SetBool("isAiming", !playerController.isAiming);
     }
 
     private void Movement()
@@ -81,6 +81,9 @@ public class PlayerAnimations : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(flatVelocity);
             mesh.rotation = Quaternion.RotateTowards(mesh.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
+        
+        float remappedSpeed = flatVelocity.magnitude / movement.moveSpeed * 2f;
+        animator.SetFloat("Speed", remappedSpeed);
 
         //if (c.isClimbing)
         //    return;
@@ -107,10 +110,21 @@ public class PlayerAnimations : MonoBehaviour
         forward.y = 0;
         forward = forward.normalized;
 
-        if(forward.magnitude < 0.001f)
+        if (forward.magnitude < 0.01f)
             return;
-        
+
         Quaternion targetRotation = Quaternion.LookRotation(forward);
         mesh.rotation = Quaternion.RotateTowards(mesh.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+
+        Vector3 localVelocity = mesh.InverseTransformDirection(movement.currentVelocity);
+
+        float maxSpeed = movement.moveSpeed;
+        if (maxSpeed < 0.001f) return; // guard divide by zero
+
+        float moveX = Mathf.Clamp(localVelocity.x / maxSpeed, -1f, 1f);
+        float moveY = Mathf.Clamp(localVelocity.z / maxSpeed, -1f, 1f);
+
+        animator.SetFloat("MoveX", moveX);
+        animator.SetFloat("MoveY", moveY);
     }
 }
