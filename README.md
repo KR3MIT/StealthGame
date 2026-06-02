@@ -5,7 +5,7 @@ Medialogy 6th. Course Project
 Department of Architecture, Design & Media Technology 
 [Aalborg University](http://www.aau.dk)
 
-Video showcase [AV](https://youtu.be/-UX7E8ynVE8 "Video showcase")
+[Video Showcase](https://youtu.be/9FmaRvwFT7I "Video showcase")
 
 Made in Unity 6000.3.8f1
 (repo does not include executable, must build self)
